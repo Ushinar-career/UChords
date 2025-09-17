@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>UChrds</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='50%' x='50%' dominant-baseline='middle' text-anchor='middle' font-size='80'>🎸</text></svg>">
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="header-bar">
+      <h1 class="app-title">UChords</h1>
+    </header>
+
+    <main class="main-content">
+      <div class="button-row">
+        <button class="create-btn border-btn">
+          <h2>+ Create Playlist</h2>
+        </button>
+        <button class="import-btn border-btn">Import</button>
+        <button class="export-btn border-btn">Export</button>
+        <input type="file" class="import-input" accept=".json" style="display: none;"/>
+      </div>
+      <section class="playlist-container">
+        <p class="empty-message">No Playlists yet. Create a playlist to get started.</p>
+        <!-- Playlist cards will be injected here dynamically -->
+        <!-- All following HTML screens are injected using JS functions -->
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>©2025. All rights reserved.</p>
+    </footer>
+
+    <script type="module" src="scripts/init.js"></script>
+  </body>
+</html>
+

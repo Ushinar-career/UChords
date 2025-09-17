@@ -184,10 +184,6 @@ input {
   border-radius: var(--border-radius);
   border: var(--border);
 }
-.playlist-card:hover,
-.song-card:hover {
-  cursor: grab;
-}
 .dragging {
   cursor: grabbing;
 }
@@ -208,7 +204,6 @@ input {
 }
 .card-actions {
   display: flex;
-  gap: 0.5rem;
 }
 .icon-btn {  
   padding: 1rem;

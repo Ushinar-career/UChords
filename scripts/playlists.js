@@ -64,12 +64,12 @@ export function renderPlaylistsView() {
     if (!container || !name) return;
     const card = document.createElement('div');
     card.className = 'playlist-card';
-    card.setAttribute('draggable', 'true');
     card.innerHTML = `
       <span class="playlist-name">${name}</span>
       <div class="card-actions">
-        <span class="icon-btn rename-btn">🖉</span>
-        <span class="icon-btn delete-btn">🗑️</span>
+        <span class="icon-btn rename-btn" title="Rename">✏️</span>
+        <span class="icon-btn delete-btn" title="Delete">🗑️</span>
+        <span class="icon-btn move-btn" title="Move/Reorder">🟰</span>
       </div>
     `;
     container.appendChild(card);
@@ -159,16 +159,28 @@ function renamePlaylist(oldName, newName) {
 
 function enablePlaylistDragAndDrop(container) {
   let draggedCard = null;
-
-  container.addEventListener('dragstart', (e) => {
-    const card = e.target.closest('.playlist-card');
-    if (card) {
+  container.querySelectorAll('.move-btn').forEach(moveBtn => {
+    moveBtn.addEventListener('mousedown', (e) => {
+      const card = e.target.closest('.playlist-card');
+      if (!card) return;
       draggedCard = card;
       applyDraggingStyle(card);
-      e.dataTransfer.effectAllowed = 'move';
-    }
+      card.setAttribute('draggable', 'true');
+    });
+    moveBtn.addEventListener('mouseup', () => {
+      if (draggedCard) {
+        resetDraggingStyle(draggedCard);
+        draggedCard.removeAttribute('draggable');
+        draggedCard = null;
+      }
+    });
+  });
+  container.addEventListener('dragstart', (e) => {
+    if (!draggedCard) return;
+    e.dataTransfer.effectAllowed = 'move';
   });
   container.addEventListener('dragover', (e) => {
+    if (!draggedCard || !(draggedCard instanceof Node)) return;
     e.preventDefault();
     const target = e.target.closest('.playlist-card');
     if (target && target !== draggedCard) {
@@ -180,13 +192,44 @@ function enablePlaylistDragAndDrop(container) {
       );
     }
   });
-  container.addEventListener('dragend', () => {
-    if (draggedCard) {
+  container.addEventListener('drop', () => {
+    if (!draggedCard || !(draggedCard instanceof Node)) return;
+    updatePlaylistOrder(container);
+    resetDraggingStyle(draggedCard);
+    draggedCard.removeAttribute('draggable');
+    draggedCard = null;
+  });
+  container.querySelectorAll('.move-btn').forEach(moveBtn => {
+    moveBtn.addEventListener('touchstart', (e) => {
+      const card = e.target.closest('.playlist-card');
+      if (!card) return;
+      draggedCard = card;
+      applyDraggingStyle(card);
+      container.style.overflowY = 'hidden';
+    });
+    moveBtn.addEventListener('touchmove', (e) => {
+      if (!draggedCard) return;
+      const touchY = e.touches[0].clientY;
+      const target = document.elementFromPoint(e.touches[0].clientX, touchY)?.closest('.playlist-card');
+      if (target && target !== draggedCard) {
+        const bounding = target.getBoundingClientRect();
+        const offset = bounding.y + bounding.height / 2;
+        container.insertBefore(
+          draggedCard,
+          touchY < offset ? target : target.nextSibling
+        );
+      }
+    });
+    moveBtn.addEventListener('touchend', () => {
+      if (!draggedCard) return;
+      updatePlaylistOrder(container);
       resetDraggingStyle(draggedCard);
       draggedCard = null;
-    }
+      container.style.overflowY = 'auto';
+    });
   });
-  container.addEventListener('drop', () => {
+
+  function updatePlaylistOrder(container) {
     const newOrder = Array.from(container.querySelectorAll('.playlist-card'))
       .map(card => card.querySelector('.playlist-name').textContent);
     const data = getAppData();
@@ -195,44 +238,7 @@ function enablePlaylistDragAndDrop(container) {
     });
     setAppData(data);
     renderPlaylistsView();
-  });
-  let touchStartY = 0;
-  let touchedCard = null;
-  container.addEventListener('touchstart', (e) => {
-    const card = e.target.closest('.playlist-card');
-    if (card) {
-      touchedCard = card;
-      touchStartY = e.touches[0].clientY;
-      applyDraggingStyle(card);
-    }
-  });
-  container.addEventListener('touchmove', (e) => {
-    e.preventDefault();
-    const touchY = e.touches[0].clientY;
-    const target = document.elementFromPoint(e.touches[0].clientX, touchY)?.closest('.playlist-card');
-    if (target && target !== touchedCard) {
-      const bounding = target.getBoundingClientRect();
-      const offset = bounding.y + bounding.height / 2;
-      container.insertBefore(
-        touchedCard,
-        touchY < offset ? target : target.nextSibling
-      );
-    }
-  });
-  container.addEventListener('touchend', () => {
-    if (touchedCard) {
-      resetDraggingStyle(touchedCard);
-      touchedCard = null;
-      const newOrder = Array.from(container.querySelectorAll('.playlist-card'))
-        .map(card => card.querySelector('.playlist-name').textContent);
-      const data = getAppData();
-      data.playlists.sort((a, b) => {
-        return newOrder.indexOf(a.name) - newOrder.indexOf(b.name);
-      });
-      setAppData(data);
-      renderPlaylistsView();
-    }
-  });
+  }
 
   function applyDraggingStyle(card) {
     card.classList.add('dragging');
@@ -240,7 +246,7 @@ function enablePlaylistDragAndDrop(container) {
     card.style.border = '2px dashed wheat';
   }
 
-    function resetDraggingStyle(card) {
+  function resetDraggingStyle(card) {
     card.classList.remove('dragging');
     card.style.opacity = '1';
     card.style.border = 'inherit';

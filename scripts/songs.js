@@ -96,20 +96,21 @@ function renderSongsView(playlistName) {
     const playlist = data.playlists.find(p => p.name === name);
     playlist?.songs.forEach(song => createSongCard(song.name, songContainer));
   }
-  
+    
   function createSongCard(name, container) {
     const card = document.createElement('div');
     card.className = 'song-card';
-    card.setAttribute('draggable', 'true');
     card.innerHTML = `
       <span class="song-name">${name}</span>
       <div class="card-actions">
-        <span class="icon-btn rename-btn">🖉</span>
-        <span class="icon-btn delete-btn">🗑️</span>
+        <span class="icon-btn rename-btn" title="Rename">✏️</span>
+        <span class="icon-btn delete-btn" title="Delete">🗑️</span>
+        <span class="icon-btn move-btn" title="Move/Reorder">🟰</span>
       </div>
     `;
     container.appendChild(card);
     toggleEmptyMessage2();
+
     const nameEl = card.querySelector('.song-name');
     nameEl.addEventListener('click', () => {
       const data = getAppData();
@@ -131,31 +132,26 @@ function renderSongsView(playlistName) {
             label: 'Rename',
             action: (newName, warningEl) => {
               const trimmed = newName?.trim();
-              if (!trimmed) {
+              if (!trimmed || trimmed === name) {
                 warningEl.textContent = 'Please enter a valid name.';
                 warningEl.style.display = 'block';
                 return false;
               }
-              if (trimmed === name) return false;
-              const data = getAppData();
-              const playlist = data.playlists.find(p => p.name === playlistName);
-              const exists = playlist?.songs.some(s => s.name.toLowerCase() === trimmed.toLowerCase());
-              if (exists) {
+
+              if (!renameSong(name, trimmed, playlistName)) {
                 warningEl.textContent = `A song named "${trimmed}" already exists in this playlist.`;
                 warningEl.style.display = 'block';
                 return false;
               }
-              card.querySelector('.song-name').textContent = trimmed;
-              renameSong(name, trimmed, playlistName);
+              renderSongsView(playlistName);
+              return true;
             }
           },
-          { 
-            label: 'Cancel', 
-            action: () => {} 
-          }
+          { label: 'Cancel', action: () => {} }
         ]
       });
     });
+
     const deleteBtn = card.querySelector('.delete-btn');
     deleteBtn.addEventListener('click', () => {
       initInputModal({
@@ -165,20 +161,18 @@ function renderSongsView(playlistName) {
           {
             label: 'Delete',
             action: () => {
-              card.remove();
-              deleteSong(name, playlistName);
-              toggleEmptyMessage2()
+              if (deleteSong(name, playlistName)) {
+                card.remove();
+                toggleEmptyMessage2();
+              }
             }
           },
-          { 
-            label: 'Cancel', 
-            action: () => {} 
-          }
+          { label: 'Cancel', action: () => {} }
         ]
       });
     });
   }
-  
+ 
   function toggleEmptyMessage2() {
     const container = document.querySelector('.song-container');
     const emptyMsg = container?.querySelector('.empty-message');
@@ -190,38 +184,90 @@ function renderSongsView(playlistName) {
 function renameSong(oldName, newName, playlistName) {
   const data = getAppData();
   const playlist = data.playlists.find(p => p.name === playlistName);
-  const song = playlist?.songs.find(s => s.name === oldName);
-  if (song) {
-    song.name = newName;
-    setAppData(data);
-  }
+  if (!playlist) return false;
+
+  const exists = playlist.songs.some(s => s.name.toLowerCase() === newName.toLowerCase());
+  if (exists) return false;
+
+  const song = playlist.songs.find(s => s.name === oldName);
+  if (!song) return false;
+
+  song.name = newName;
+  setAppData(data);
+  return true;
 }
 
 function deleteSong(name, playlistName) {
   const data = getAppData();
   const playlist = data.playlists.find(p => p.name === playlistName);
-  if (playlist) {
-    playlist.songs = playlist.songs.filter(s => s.name !== name);
-    setAppData(data);
-  }
+  if (!playlist) return false;
+
+  const index = playlist.songs.findIndex(s => s.name === name);
+  if (index === -1) return false;
+
+  playlist.songs.splice(index, 1);
+  setAppData(data);
+  return true;
 }
 
 function enableSongDragAndDrop(container, playlistName) {
   let draggedCard = null;
 
-  // Desktop drag events
-  container.addEventListener('dragstart', (e) => {
-    const card = e.target.closest('.song-card');
-    if (card) {
+  container.querySelectorAll('.move-btn').forEach(moveBtn => {
+    moveBtn.addEventListener('mousedown', (e) => {
+      const card = e.target.closest('.song-card');
+      if (!card) return;
       draggedCard = card;
-      card.classList.add('dragging');
-      card.style.opacity = '0.6';
-      card.style.border = '2px dashed lightgray';
-      e.dataTransfer.effectAllowed = 'move';
-    }
+      applyDraggingStyle(card);
+      card.setAttribute('draggable', 'true');
+    });
+
+    moveBtn.addEventListener('mouseup', () => {
+      if (draggedCard) {
+        resetDraggingStyle(draggedCard);
+        draggedCard.removeAttribute('draggable');
+        draggedCard = null;
+      }
+    });
+
+    moveBtn.addEventListener('touchstart', (e) => {
+      const card = e.target.closest('.song-card');
+      if (!card) return;
+      draggedCard = card;
+      applyDraggingStyle(card);
+      container.style.overflowY = 'hidden';
+    });
+
+    moveBtn.addEventListener('touchmove', (e) => {
+      if (!draggedCard) return;
+      const touchY = e.touches[0].clientY;
+      const target = document.elementFromPoint(e.touches[0].clientX, touchY)?.closest('.song-card');
+      if (target && target !== draggedCard) {
+        const bounding = target.getBoundingClientRect();
+        const offset = bounding.y + bounding.height / 2;
+        container.insertBefore(
+          draggedCard,
+          touchY < offset ? target : target.nextSibling
+        );
+      }
+    });
+
+    moveBtn.addEventListener('touchend', () => {
+      if (!draggedCard) return;
+      updateSongOrder(container, playlistName);
+      resetDraggingStyle(draggedCard);
+      draggedCard = null;
+      container.style.overflowY = 'auto';
+    });
+  });
+
+  container.addEventListener('dragstart', (e) => {
+    if (!draggedCard) return;
+    e.dataTransfer.effectAllowed = 'move';
   });
 
   container.addEventListener('dragover', (e) => {
+    if (!draggedCard) return;
     e.preventDefault();
     const target = e.target.closest('.song-card');
     if (target && target !== draggedCard) {
@@ -234,71 +280,35 @@ function enableSongDragAndDrop(container, playlistName) {
     }
   });
 
-  container.addEventListener('dragend', () => {
-    if (draggedCard) {
-      draggedCard.classList.remove('dragging');
-      draggedCard.style.opacity = '1';
-      draggedCard.style.border = 'inherit';
-      draggedCard = null;
-    }
-  });
-
   container.addEventListener('drop', () => {
+    if (!draggedCard) return;
     updateSongOrder(container, playlistName);
-  });
-
-  // Touch events for mobile
-  let touchStartY = 0;
-  let touchedCard = null;
-
-  container.addEventListener('touchstart', (e) => {
-    const card = e.target.closest('.song-card');
-    if (card) {
-      touchedCard = card;
-      touchStartY = e.touches[0].clientY;
-      card.classList.add('dragging');
-      card.style.opacity = '0.6';
-      card.style.border = '2px dashed lightgray';
-    }
-  });
-
-  container.addEventListener('touchmove', (e) => {
-    e.preventDefault();
-    const touchY = e.touches[0].clientY;
-    const target = document.elementFromPoint(e.touches[0].clientX, touchY)?.closest('.song-card');
-
-    if (target && target !== touchedCard) {
-      const bounding = target.getBoundingClientRect();
-      const offset = bounding.y + bounding.height / 2;
-      container.insertBefore(
-        touchedCard,
-        touchY < offset ? target : target.nextSibling
-      );
-    }
-  });
-
-  container.addEventListener('touchend', () => {
-    if (touchedCard) {
-      touchedCard.classList.remove('dragging');
-      touchedCard.style.opacity = '1';
-      touchedCard.style.border = 'inherit';
-      touchedCard = null;
-      updateSongOrder(container, playlistName);
-    }
+    resetDraggingStyle(draggedCard);
+    draggedCard.removeAttribute('draggable');
+    draggedCard = null;
   });
 
   function updateSongOrder(container, playlistName) {
     const newOrder = Array.from(container.querySelectorAll('.song-card'))
       .map(card => card.querySelector('.song-name').textContent);
-
     const data = getAppData();
     const playlist = data.playlists.find(p => p.name === playlistName);
     if (playlist) {
-      playlist.songs.sort((a, b) => {
-        return newOrder.indexOf(a.name) - newOrder.indexOf(b.name);
-      });
+      playlist.songs.sort((a, b) => newOrder.indexOf(a.name) - newOrder.indexOf(b.name));
       setAppData(data);
     }
+  }
+
+  function applyDraggingStyle(card) {
+    card.classList.add('dragging');
+    card.style.opacity = '0.6';
+    card.style.border = '2px dashed lightgray';
+  }
+
+  function resetDraggingStyle(card) {
+    card.classList.remove('dragging');
+    card.style.opacity = '1';
+    card.style.border = 'inherit';
   }
 }
 

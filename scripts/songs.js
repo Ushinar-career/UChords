@@ -64,7 +64,7 @@ function renderSongsView(playlistName) {
   });
   const createBackBtn = document.createElement('button');
   createBackBtn.className = 'back-btn border-btn';
-  createBackBtn.innerHTML = '<p>⮜ Back</p>';
+  createBackBtn.innerHTML = '<p>❮ Back</p>';
   createBackBtn.addEventListener('click', () => {
     createMainContent.innerHTML = `
       <div class="button-row">
@@ -299,7 +299,6 @@ function renderSongsView(playlistName) {
     }
   }
 }
-
 
 
 

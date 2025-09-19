@@ -3,13 +3,19 @@
   <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>UChrds</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='50%' x='50%' dominant-baseline='middle' text-anchor='middle' font-size='80'>🎸</text></svg>">
+    <meta name="description" content="UChords">
+    <!-- <link rel="manifest" href="./manifest.json"> -->
+    <title>UChords</title>
     <link rel="stylesheet" href="styles.css" />
+    <link rel="icon" type="image/png" href="assets/images/icon.png">
+
   </head>
   <body>
     <header class="header-bar">
-      <h1 class="app-title">UChords</h1>
+      <div class="app-title">
+        <img class="logo" src="assets/images/icon.png" alt="UChords Icon">
+        <h1>UChords</h1>
+      </div>
     </header>
 
     <main class="main-content">
@@ -22,7 +28,7 @@
         <input type="file" class="import-input" accept=".json" style="display: none;"/>
       </div>
       <section class="playlist-container">
-        <p class="empty-message">No Playlists yet. Create a playlist to get started.</p>
+        <p class="empty-message">🎶 No Playlists yet. Create a Playlist to get started.</p>
         <!-- Playlist cards will be injected here dynamically -->
         <!-- All following HTML screens are injected using JS functions -->
       </section>
@@ -35,4 +41,9 @@
     <script type="module" src="scripts/init.js"></script>
   </body>
 </html>
+
+
+<!-- integrate native android back key 
+remember scroll speed for songs
+remember zoom level for songs-->
 

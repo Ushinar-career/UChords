@@ -1,5 +1,4 @@
 import { getAppData, setAppData } from './storage.js';
-import { initAlertModal} from './utils.js';
 
 export function initViewer(playlistName, songName, songContent) {
   const overlay = renderViewer(songName, songContent);
@@ -11,21 +10,24 @@ function renderViewer(songName, songContent) {
   const overlay = document.createElement('div');
   overlay.className = 'viewer';
   overlay.innerHTML = `
-    <div class="header-bar">
-      <h1>${songName}</h1>
-    </div>
+    <header class="header-bar">
+      <div class="app-title">
+        <img class="logo" src="assets/images/icon.png" alt="UChords Icon">
+        <h1>${songName}</h1>
+      </div>
+    </header>
     <main class="main-content">
       <div class="button-row">
         <button class="border-btn scroll-btn"><h2>Scroll</h2></button>
         <button class="border-btn speed-decrease" title="Decrease Speed">−</button>
-        <input type="number" class="speed-input" min="0.1" max="3" step="0.1" value="1.0"/>
+        <input type="number" class="speed-input" min="0.1" max="5" step="0.1" value="1.0"/>
         <button class="border-btn speed-increase" title="Increase Speed">+</button>
         <button class="border-btn edit-btn">Edit\u2002\u200A</button>
         <button class="close-btn border-btn">Close</button>
       </div>
       <section class="viewer-container">
         <div class="viewer-content">
-          <pre class="song-text" contenteditable="false" style='cursor: zoom-in;'>${songContent}</pre>
+          <pre class="song-text" contenteditable="false">${songContent}</pre>
         </div>
       </section>
     </main>
@@ -40,7 +42,6 @@ function setupAutoScroll(overlay) {
   const speedInput = overlay.querySelector('.speed-input');
   const decreaseBtn = overlay.querySelector('.speed-decrease');
   const increaseBtn = overlay.querySelector('.speed-increase');
-  const songText = overlay.querySelector('.song-text');
 
   // Initialize shared scrollInterval on overlay
   overlay._scrollInterval = null;
@@ -67,7 +68,7 @@ function setupAutoScroll(overlay) {
 
   function adjustSpeed(delta) {
     let currentSpeed = parseFloat(speedInput.value);
-    let newSpeed = Math.min(3, Math.max(0.1, currentSpeed + delta));
+    let newSpeed = Math.min(5, Math.max(0.1, currentSpeed + delta));
     speedInput.value = newSpeed.toFixed(1);
     if (overlay._scrollInterval !== null) {
       clearInterval(overlay._scrollInterval);
@@ -76,11 +77,6 @@ function setupAutoScroll(overlay) {
   }
 
   scrollBtn.addEventListener('click', () => {
-    const isEditing = songText.getAttribute('contenteditable') === 'true';
-    if (isEditing) {
-      initAlertModal('Please save your changes before scrolling.', 'Unsaved Changes');
-      return;
-    }
     const isScrolling = overlay._scrollInterval !== null;
     if (isScrolling) {
       clearInterval(overlay._scrollInterval);
@@ -94,15 +90,77 @@ function setupAutoScroll(overlay) {
 
   decreaseBtn.addEventListener('click', () => adjustSpeed(-0.1));
   increaseBtn.addEventListener('click', () => adjustSpeed(0.1));
+  speedInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      let newSpeed = parseFloat(speedInput.value);
+      if (!isNaN(newSpeed)) {
+        newSpeed = Math.min(5, Math.max(0.1, newSpeed));
+        speedInput.value = newSpeed.toFixed(1);
+        if (overlay._scrollInterval !== null) {
+          clearInterval(overlay._scrollInterval);
+          startAutoScroll();
+        }
+      }
+    }
+  });
 }
 
-function setupEditLogic(overlay, playlistName, songName) {
+export function setupEditLogic(overlay, playlistName, songName) {
   const editBtn = overlay.querySelector('.edit-btn');
   const songText = overlay.querySelector('.song-text');
   const scrollBtn = overlay.querySelector('.scroll-btn');
+  const closeBtn = overlay.querySelector('.close-btn');
   let currentFontSize = 16;
 
   songText.style.fontSize = `${currentFontSize}px`;
+let lastTapTime = 0;
+let zoomMode = false;
+let startY = 0;
+
+songText.addEventListener('touchstart', (e) => {
+  const now = Date.now();
+  const timeSinceLastTap = now - lastTapTime;
+
+  if (timeSinceLastTap < 300 && e.touches.length === 1) {
+    zoomMode = true;
+    startY = e.touches[0].clientY;
+
+    // Prevent scroll while zooming
+    const viewerContainer = overlay.querySelector('.viewer-container');
+    viewerContainer.style.overflow = 'hidden';
+  }
+
+  lastTapTime = now;
+});
+
+songText.addEventListener('touchmove', (e) => {
+  if (!zoomMode || e.touches.length !== 1) return;
+
+  const currentY = e.touches[0].clientY;
+  const deltaY = currentY - startY;
+
+  if (Math.abs(deltaY) > 5) {
+    if (deltaY < 0) {
+      // Dragging up → Zoom In
+      currentFontSize = Math.min(currentFontSize + 1, 48);
+    } else {
+      // Dragging down → Zoom Out
+      currentFontSize = Math.max(currentFontSize - 1, 8);
+    }
+    songText.style.fontSize = `${currentFontSize}px`;
+    startY = currentY; // Update for smoother zoom
+  }
+});
+
+songText.addEventListener('touchend', () => {
+  if (zoomMode) {
+    zoomMode = false;
+
+    // Restore scroll
+    const viewerContainer = overlay.querySelector('.viewer-container');
+    viewerContainer.style.overflow = '';
+  }
+});
 
   function saveSongContent(content) {
     const data = getAppData();
@@ -125,18 +183,44 @@ function setupEditLogic(overlay, playlistName, songName) {
     }
 
     if (isEditing) {
+      // Save mode → disable editing
       songText.setAttribute('contenteditable', 'false');
       songText.style.cursor = 'zoom-in';
       editBtn.textContent = 'Edit' + '\u2002\u200A';
       saveSongContent(songText.innerText);
+
+      // Re-enable buttons
+      scrollBtn.classList.remove('disabled');
+      closeBtn.classList.remove('disabled');
     } else {
+        // Edit mode → enable editing
       songText.setAttribute('contenteditable', 'true');
       songText.style.cursor = 'text';
       songText.style.fontSize = `${currentFontSize}px`;
       songText.focus();
+
+      // Scroll viewer container to top
+      const viewerContainer = overlay.querySelector('.viewer-container');
+      viewerContainer.scrollTop = 0;
+
+      // Move cursor to the beginning
+      const range = document.createRange();
+      const selection = window.getSelection();
+      range.setStart(songText.firstChild || songText, 0);
+      range.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(range);
+
       editBtn.textContent = 'Save';
-    }
+      scrollBtn.classList.add('disabled');
+      closeBtn.classList.add('disabled');
+
+      }
+
   });
+
+
+
 
 songText.addEventListener('pointerdown', (e) => {
   const isEditing = songText.getAttribute('contenteditable') === 'true';

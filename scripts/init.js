@@ -6,22 +6,9 @@ document.addEventListener('DOMContentLoaded', () => {
   initPlaylists();
 });
 
-// ✅ handle going back to playlists
-document.addEventListener('songs:close', () => {
-  const mainContent = document.querySelector('.main-content');
-  mainContent.innerHTML = `
-    <div class="button-row">
-      <button class="create-btn border-btn">
-        <h2>+ Create Playlist</h2>
-      </button>
-      <button class="import-btn border-btn">Import</button>
-      <button class="export-btn border-btn">Export</button>
-      <input type="file" class="import-input" accept=".zip" style="display: none;"/>
-    </div>
-    <section class="playlist-container">
-      <p class="empty-message">No Playlists yet. Create a playlist to get started.</p>
-    </section>
-  `;
-  initImportExport();
-  initPlaylists();
-});
+if ('serviceWorker' in navigator) { 
+  navigator.serviceWorker.register('./service-worker.js') 
+  .then(reg => console.log('Service Worker registered:', reg)) 
+  .catch(err => console.error('Service Worker registration failed:', err
+  ));
+}

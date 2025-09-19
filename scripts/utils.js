@@ -100,30 +100,50 @@ export function initAlertModal(message, title = 'Notification', callback = null)
 }
 
 // Import-Export Logic
-// Import-Export Logic (No JSZip, No FileSaver.js)
 export function initImportExport() {
   const exportBtn = document.querySelector('.export-btn');
   const importBtn = document.querySelector('.import-btn');
   const importInput = document.querySelector('.import-input');
-
-  // Export as plain JSON
   exportBtn.addEventListener('click', () => {
+    initInputModal({
+      title: 'Export Playlists',
+      message: 'Enter a filename.',
+      input: true,
+      defaultValue: 'UChordsData',
+      placeholder: 'Filename',
+      buttons: [
+        {
+          label: 'Export',
+          action: (value, warningEl) => {
+            if (!value) {
+              warningEl.textContent = 'Filename cannot be empty.';
+              warningEl.style.display = 'block';
+              return false;
+            }
+            exportDataAsJSON(value);
+          }
+        },
+        {
+          label: 'Cancel',
+          action: () => {}
+        }
+      ]
+    });
+  });
+  function exportDataAsJSON(filename) {
     const data = getAppData();
     const jsonBlob = new Blob([JSON.stringify(data, null, 2)], {
       type: 'application/json'
     });
-
     const url = URL.createObjectURL(jsonBlob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'UChordsData.json';
+    a.download = `${filename}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  });
-
-  // Confirm before importing
+  }
   importBtn.addEventListener('click', () => {
     initInputModal({
       title: 'Import Playlists',
@@ -134,24 +154,21 @@ export function initImportExport() {
       ]
     });
   });
-
-  // Handle JSON import
   importInput.addEventListener('change', async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     try {
       const text = await file.text();
       const parsedData = JSON.parse(text);
-
       if (!Array.isArray(parsedData.playlists)) {
         throw new Error('Invalid data format. Expected an array of playlists.');
       }
-
       setAppData(parsedData);
       toggleEmptyMessage();
       renderPlaylistsView();
-      initAlertModal('Playlists imported successfully!', 'Import Complete');
+      initAlertModal(
+        'Playlists imported successfully!',
+        'Import Complete');
     } catch (err) {
       console.error('Import error:', err);
       initAlertModal(err.message, 'Import Error');
@@ -161,8 +178,6 @@ export function initImportExport() {
   });
 }
 
-
-// Empty Message Toggle Logic
 export function toggleEmptyMessage() {
   const data = getAppData();
   const emptyMessage = document.querySelector('.empty-message');
@@ -173,14 +188,12 @@ export function toggleEmptyMessage() {
   }
 }
 
-// Export Button Disabling Logic
 export function updateExportButtonState() {
   const exportBtn = document.querySelector('.export-btn');
   const playlists = getAppData().playlists;
   const isDisabled = !playlists || playlists.length === 0;
 
-  exportBtn.disabled = isDisabled;
-  exportBtn.style.opacity = isDisabled ? '0.6' : '1';
-  exportBtn.style.cursor = isDisabled ? 'not-allowed' : 'pointer';
+  exportBtn.classList.toggle('disabled', isDisabled);
 }
+
 

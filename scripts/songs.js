@@ -32,7 +32,6 @@ function renderSongsView(playlistName) {
               warningEl.style.display = 'block';
               return false;
             }
-
             const data = getAppData();
             const playlist = data.playlists.find(p => p.name === playlistName);
             const exists = playlist?.songs.some(s => s.name.toLowerCase() === trimmed.toLowerCase());
@@ -44,7 +43,7 @@ function renderSongsView(playlistName) {
             }
 
             if (playlist) {
-              playlist.songs.push({ name: trimmed, content: ''});
+              playlist.songs.push({ name: trimmed, content: 'Enter/Edit text here...'});
               setAppData(data);
               createSongCard(trimmed, songContainer);
               toggleEmptyMessage2();
@@ -60,7 +59,7 @@ function renderSongsView(playlistName) {
   });
   const createBackBtn = document.createElement('button');
   createBackBtn.className = 'back-btn border-btn';
-  createBackBtn.innerHTML = '<p>← Back</p>';
+  createBackBtn.innerHTML = '<p>< Back</p>';
   createBackBtn.addEventListener('click', () => {
     createMainContent.innerHTML = `
       <div class="button-row">
@@ -85,7 +84,7 @@ function renderSongsView(playlistName) {
   songContainer.className = 'song-container';
   const emptyMsg = document.createElement('p');
   emptyMsg.className = 'empty-message';
-  emptyMsg.textContent = 'No songs in this playlist yet.';
+  emptyMsg.textContent = '🎶 No Songs yet. Create a Song to get started.';
   songContainer.appendChild(emptyMsg);
   createMainContent.appendChild(songContainer);
   addSong(playlistName);

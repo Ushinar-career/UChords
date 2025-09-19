@@ -35,18 +35,17 @@ function renderSongsView(playlistName) {
             const data = getAppData();
             const playlist = data.playlists.find(p => p.name === playlistName);
             const exists = playlist?.songs.some(s => s.name.toLowerCase() === trimmed.toLowerCase());
-
             if (exists) {
               warningEl.textContent = `A song named "${trimmed}" already exists in this playlist.`;
               warningEl.style.display = 'block';
               return false;
             }
-
             if (playlist) {
               playlist.songs.push({ name: trimmed, content: 'Enter/Edit text here...'});
               setAppData(data);
               createSongCard(trimmed, songContainer);
-              toggleEmptyMessage2();
+              toggleEmptyMessage2();  
+              enableSongDragAndDrop(songContainer, playlistName);
             }
           }
         },
@@ -109,7 +108,6 @@ function renderSongsView(playlistName) {
     `;
     container.appendChild(card);
     toggleEmptyMessage2();
-
     const nameEl = card.querySelector('.song-name');
     nameEl.addEventListener('click', () => {
       const data = getAppData();
@@ -118,7 +116,6 @@ function renderSongsView(playlistName) {
       const content = song?.content || '';
       initViewer(playlistName, name, content);
     });
-
     const renameBtn = card.querySelector('.rename-btn');
     renameBtn.addEventListener('click', () => {
       initInputModal({
@@ -136,7 +133,6 @@ function renderSongsView(playlistName) {
                 warningEl.style.display = 'block';
                 return false;
               }
-
               if (!renameSong(name, trimmed, playlistName)) {
                 warningEl.textContent = `A song named "${trimmed}" already exists in this playlist.`;
                 warningEl.style.display = 'block';
@@ -184,13 +180,10 @@ function renameSong(oldName, newName, playlistName) {
   const data = getAppData();
   const playlist = data.playlists.find(p => p.name === playlistName);
   if (!playlist) return false;
-
   const exists = playlist.songs.some(s => s.name.toLowerCase() === newName.toLowerCase());
   if (exists) return false;
-
   const song = playlist.songs.find(s => s.name === oldName);
   if (!song) return false;
-
   song.name = newName;
   setAppData(data);
   return true;
@@ -200,10 +193,8 @@ function deleteSong(name, playlistName) {
   const data = getAppData();
   const playlist = data.playlists.find(p => p.name === playlistName);
   if (!playlist) return false;
-
   const index = playlist.songs.findIndex(s => s.name === name);
   if (index === -1) return false;
-
   playlist.songs.splice(index, 1);
   setAppData(data);
   return true;
@@ -211,7 +202,6 @@ function deleteSong(name, playlistName) {
 
 function enableSongDragAndDrop(container, playlistName) {
   let draggedCard = null;
-
   container.querySelectorAll('.move-btn').forEach(moveBtn => {
     moveBtn.addEventListener('mousedown', (e) => {
       const card = e.target.closest('.song-card');
@@ -220,7 +210,6 @@ function enableSongDragAndDrop(container, playlistName) {
       applyDraggingStyle(card);
       card.setAttribute('draggable', 'true');
     });
-
     moveBtn.addEventListener('mouseup', () => {
       if (draggedCard) {
         resetDraggingStyle(draggedCard);
@@ -228,7 +217,6 @@ function enableSongDragAndDrop(container, playlistName) {
         draggedCard = null;
       }
     });
-
     moveBtn.addEventListener('touchstart', (e) => {
       const card = e.target.closest('.song-card');
       if (!card) return;
@@ -236,7 +224,6 @@ function enableSongDragAndDrop(container, playlistName) {
       applyDraggingStyle(card);
       container.style.overflowY = 'hidden';
     });
-
     moveBtn.addEventListener('touchmove', (e) => {
       if (!draggedCard) return;
       const touchY = e.touches[0].clientY;
@@ -250,7 +237,6 @@ function enableSongDragAndDrop(container, playlistName) {
         );
       }
     });
-
     moveBtn.addEventListener('touchend', () => {
       if (!draggedCard) return;
       updateSongOrder(container, playlistName);
@@ -259,12 +245,10 @@ function enableSongDragAndDrop(container, playlistName) {
       container.style.overflowY = 'auto';
     });
   });
-
   container.addEventListener('dragstart', (e) => {
     if (!draggedCard) return;
     e.dataTransfer.effectAllowed = 'move';
   });
-
   container.addEventListener('dragover', (e) => {
     if (!draggedCard) return;
     e.preventDefault();
@@ -278,7 +262,6 @@ function enableSongDragAndDrop(container, playlistName) {
       );
     }
   });
-
   container.addEventListener('drop', () => {
     if (!draggedCard) return;
     updateSongOrder(container, playlistName);

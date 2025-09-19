@@ -1,5 +1,8 @@
 import { getAppData, setAppData } from './storage.js';
 
+// ==============================
+// Initialization Logic
+// ==============================
 export function initViewer(playlistName, songName, songContent) {
   const overlay = renderViewer(songName, songContent);
   setupAutoScroll(overlay);
@@ -12,8 +15,7 @@ function renderViewer(songName, songContent) {
   overlay.innerHTML = `
     <header class="header-bar">
       <div class="app-title">
-        <img class="logo" src="assets/images/icon.png" alt="UChords Icon">
-        <h1>${songName}</h1>
+        <i>${songName}</i>
       </div>
     </header>
     <main class="main-content">
@@ -22,8 +24,8 @@ function renderViewer(songName, songContent) {
         <button class="border-btn speed-decrease" title="Decrease Speed">−</button>
         <input type="number" class="speed-input" min="0.1" max="5" step="0.1" value="1.0"/>
         <button class="border-btn speed-increase" title="Increase Speed">+</button>
-        <button class="border-btn edit-btn">Edit\u2002\u200A</button>
-        <button class="close-btn border-btn">Close</button>
+        <button class="border-btn edit-btn">Edit</button>
+        <button class="close-btn border-btn">❌</button>
       </div>
       <section class="viewer-container">
         <div class="viewer-content">
@@ -82,8 +84,10 @@ function setupAutoScroll(overlay) {
       clearInterval(overlay._scrollInterval);
       overlay._scrollInterval = null;
       scrollBtn.querySelector('h2').textContent = 'Scroll';
+      scrollBtn.style.color = 'inherit';
     } else {
-      scrollBtn.querySelector('h2').textContent = 'Stop' + '\u2002\u200A';
+      scrollBtn.querySelector('h2').textContent = '■';
+      scrollBtn.style.color = 'red';
       startAutoScroll();
     }
   });
@@ -180,13 +184,14 @@ songText.addEventListener('touchend', () => {
       clearInterval(overlay._scrollInterval);
       overlay._scrollInterval = null;
       scrollBtn.querySelector('h2').textContent = 'Scroll';
+      scrollBtn.style.color = 'inherit';
     }
 
     if (isEditing) {
       // Save mode → disable editing
       songText.setAttribute('contenteditable', 'false');
       songText.style.cursor = 'zoom-in';
-      editBtn.textContent = 'Edit' + '\u2002\u200A';
+      editBtn.textContent = 'Edit';
       saveSongContent(songText.innerText);
 
       // Re-enable buttons

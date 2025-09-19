@@ -7,13 +7,19 @@
     <link rel="manifest" href="./manifest.json">
     <title>UChords</title>
     <link rel="stylesheet" href="styles.css" />
-    <link rel="icon" type="image/png" href="assets/images/icon.png">
+    <link rel="icon" type="image/png" href="assets/images/favicon.png">
 
   </head>
+
   <body>
+    <div class="global-loader">
+      <div class="spinner"></div>
+      <p>Loading UChords...</p>
+    </div>
+
     <header class="header-bar">
       <div class="app-title">
-        <img class="logo" src="assets/images/icon.png" alt="UChords Icon">
+        <img class="logo" src="assets/images/icon.svg" alt="UChords Icon">
         <h1>UChords</h1>
       </div>
     </header>
@@ -21,7 +27,7 @@
     <main class="main-content">
       <div class="button-row">
         <button class="create-btn border-btn">
-          <h2>+ Create Playlist</h2>
+          <h2>➕ Create Playlist</h2>
         </button>
         <button class="import-btn border-btn">Import</button>
         <button class="export-btn border-btn">Export</button>
@@ -43,8 +49,6 @@
 </html>
 
 
-<!-- integrate native android back key 
-remember scroll speed for songs
-remember zoom level for songs-->
-
+<!-- remember scroll speed for songs
+    remember zoom level for songs-- >
 

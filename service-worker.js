@@ -1,4 +1,4 @@
-const CACHE_NAME = 'uchords-cache-v1';
+const CACHE_NAME = 'uchords-cache-data';
 const urlsToCache = [
   './',
   './index.html',

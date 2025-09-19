@@ -1,39 +1,10 @@
 import { getAppData, setAppData } from './storage.js';
 import { renderPlaylistsView } from './playlists.js';
 
-// Helper: Create DOM element
-function createElement(tag, className, props = {}) {
-  const el = document.createElement(tag);
-  if (className) el.className = className;
-  Object.assign(el, props);
-  return el;
-}
 
-// Helper: Setup modal interactions
-function setupModalInteractions({ inputEl, firstBtn, overlay }) {
-  if (inputEl) {
-    inputEl.focus();
-    inputEl.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') firstBtn?.click();
-    });
-  } else {
-    firstBtn?.focus();
-  }
-
-  const escHandler = (e) => {
-    if (e.key === 'Escape') {
-      document.body.removeChild(overlay);
-      document.removeEventListener('keydown', escHandler);
-    }
-  };
-  document.addEventListener('keydown', escHandler);
-
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) document.body.removeChild(overlay);
-  });
-}
-
-// Modal: Input
+// ==============================
+// Input Modal Logic
+// ==============================
 export function initInputModal({
   title,
   message = '',
@@ -46,23 +17,19 @@ export function initInputModal({
   const modal = createElement('div', 'modal');
   const titleEl = createElement('h2', 'modal-title', { textContent: title });
   modal.appendChild(titleEl);
-
   if (message) {
     modal.appendChild(createElement('p', 'modal-message', { textContent: message }));
   }
-
   const inputEl = input ? createElement('input', null, {
     type: 'text',
     placeholder,
     value: defaultValue
   }) : null;
   if (inputEl) modal.appendChild(inputEl);
-
   const warningEl = createElement('div', 'modal-warning', {
     style: 'color: red; margin-top: 8px; display: none;'
   });
   modal.appendChild(warningEl);
-
   const actions = createElement('div', 'modal-actions');
   const buttonElements = buttons.map(({ label, action }) => {
     const btn = createElement('button', 'modal-btn', { textContent: label });
@@ -75,15 +42,43 @@ export function initInputModal({
     actions.appendChild(btn);
     return btn;
   });
-
   modal.appendChild(actions);
   overlay.appendChild(modal);
   document.body.appendChild(overlay);
-
   setupModalInteractions({ inputEl, firstBtn: buttonElements[0], overlay });
+  
+  function createElement(tag, className, props = {}) {
+    const el = document.createElement(tag);
+    if (className) el.className = className;
+    Object.assign(el, props);
+    return el;
+  }
+
+  function setupModalInteractions({ inputEl, firstBtn, overlay }) {
+    if (inputEl) {
+      inputEl.focus();
+      inputEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') firstBtn?.click();
+      });
+    } else {
+      firstBtn?.focus();
+    }
+    const escHandler = (e) => {
+      if (e.key === 'Escape') {
+        document.body.removeChild(overlay);
+        document.removeEventListener('keydown', escHandler);
+      }
+    };
+    document.addEventListener('keydown', escHandler);
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) document.body.removeChild(overlay);
+    });
+  }
 }
 
-// Modal: Alert
+// ==============================
+// Alert Modal Logic
+// ==============================
 export function initAlertModal(message, title = 'Notification', callback = null) {
   initInputModal({
     title,
@@ -99,7 +94,9 @@ export function initAlertModal(message, title = 'Notification', callback = null)
   });
 }
 
+// ==============================
 // Import-Export Logic
+// ==============================
 export function initImportExport() {
   const exportBtn = document.querySelector('.export-btn');
   const importBtn = document.querySelector('.import-btn');

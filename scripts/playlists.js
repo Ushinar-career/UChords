@@ -2,12 +2,19 @@ import { initInputModal, toggleEmptyMessage, updateExportButtonState } from './u
 import { getAppData, setAppData } from './storage.js';
 import { initSongsList } from './songs.js';
 
+
+// ==============================
+// Initialization Logic
+// ==============================
 export function initPlaylists() {
-    createPlaylist();
+    createPlaylistCard();
     renderPlaylistsView();
 }
 
-function createPlaylist() {
+// ==============================
+// Playlist Creation Logic
+// ==============================
+function createPlaylistCard() {
   const createBtn = document.querySelector('.create-btn');
   createBtn.addEventListener('click', () => {
     initInputModal({
@@ -51,6 +58,9 @@ function createPlaylist() {
   }
 }
 
+// ==============================
+// Playlist Rendering Logic
+// ==============================
 export function renderPlaylistsView() {
   const container = document.querySelector('.playlist-container');
   if (!container) return;
@@ -130,127 +140,128 @@ export function renderPlaylistsView() {
   }
   enablePlaylistDragAndDrop(container);
   updateExportButtonState();
-}
 
-function deletePlaylist(name) {
-  const data = getAppData();
-  const index = data.playlists.findIndex(p => p.name === name);
-  if (index === -1) return;
+  function deletePlaylist(name) {
+    const data = getAppData();
+    const index = data.playlists.findIndex(p => p.name === name);
+    if (index === -1) return;
 
-  data.playlists.splice(index, 1);
-  setAppData(data);
-  toggleEmptyMessage();
-  renderPlaylistsView();
-}
+    data.playlists.splice(index, 1);
+    setAppData(data);
+    toggleEmptyMessage();
+    renderPlaylistsView();
+  }
 
-function renamePlaylist(oldName, newName) {
-  const data = getAppData();
-  const exists = data.playlists.some(p => p.name.toLowerCase() === newName.toLowerCase());
-  if (exists) return false;
+  function renamePlaylist(oldName, newName) {
+    const data = getAppData();
+    const exists = data.playlists.some(p => p.name.toLowerCase() === newName.toLowerCase());
+    if (exists) return false;
 
-  const playlist = data.playlists.find(p => p.name === oldName);
-  if (!playlist) return false;
+    const playlist = data.playlists.find(p => p.name === oldName);
+    if (!playlist) return false;
 
-  playlist.name = newName;
-  setAppData(data);
-  renderPlaylistsView();
-  return true;
-}
+    playlist.name = newName;
+    setAppData(data);
+    renderPlaylistsView();
+    return true;
+  }
 
-function enablePlaylistDragAndDrop(container) {
-  let draggedCard = null;
-  container.querySelectorAll('.move-btn').forEach(moveBtn => {
-    moveBtn.addEventListener('mousedown', (e) => {
-      const card = e.target.closest('.playlist-card');
-      if (!card) return;
-      draggedCard = card;
-      applyDraggingStyle(card);
-      card.setAttribute('draggable', 'true');
+  function enablePlaylistDragAndDrop(container) {
+    let draggedCard = null;
+    container.querySelectorAll('.move-btn').forEach(moveBtn => {
+      moveBtn.addEventListener('mousedown', (e) => {
+        const card = e.target.closest('.playlist-card');
+        if (!card) return;
+        draggedCard = card;
+        applyDraggingStyle(card);
+        card.setAttribute('draggable', 'true');
+      });
+      moveBtn.addEventListener('mouseup', () => {
+        if (draggedCard) {
+          resetDraggingStyle(draggedCard);
+          draggedCard.removeAttribute('draggable');
+          draggedCard = null;
+        }
+      });
     });
-    moveBtn.addEventListener('mouseup', () => {
-      if (draggedCard) {
-        resetDraggingStyle(draggedCard);
-        draggedCard.removeAttribute('draggable');
-        draggedCard = null;
-      }
-    });
-  });
-  container.addEventListener('dragstart', (e) => {
-    if (!draggedCard) return;
-    e.dataTransfer.effectAllowed = 'move';
-  });
-  container.addEventListener('dragover', (e) => {
-    if (!draggedCard || !(draggedCard instanceof Node)) return;
-    e.preventDefault();
-    const target = e.target.closest('.playlist-card');
-    if (target && target !== draggedCard) {
-      const bounding = target.getBoundingClientRect();
-      const offset = bounding.y + bounding.height / 2;
-      container.insertBefore(
-        draggedCard,
-        e.clientY < offset ? target : target.nextSibling
-      );
-    }
-  });
-  container.addEventListener('drop', () => {
-    if (!draggedCard || !(draggedCard instanceof Node)) return;
-    updatePlaylistOrder(container);
-    resetDraggingStyle(draggedCard);
-    draggedCard.removeAttribute('draggable');
-    draggedCard = null;
-  });
-  container.querySelectorAll('.move-btn').forEach(moveBtn => {
-    moveBtn.addEventListener('touchstart', (e) => {
-      const card = e.target.closest('.playlist-card');
-      if (!card) return;
-      draggedCard = card;
-      applyDraggingStyle(card);
-      container.style.overflowY = 'hidden';
-    });
-    moveBtn.addEventListener('touchmove', (e) => {
+    container.addEventListener('dragstart', (e) => {
       if (!draggedCard) return;
-      const touchY = e.touches[0].clientY;
-      const target = document.elementFromPoint(e.touches[0].clientX, touchY)?.closest('.playlist-card');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    container.addEventListener('dragover', (e) => {
+      if (!draggedCard || !(draggedCard instanceof Node)) return;
+      e.preventDefault();
+      const target = e.target.closest('.playlist-card');
       if (target && target !== draggedCard) {
         const bounding = target.getBoundingClientRect();
         const offset = bounding.y + bounding.height / 2;
         container.insertBefore(
           draggedCard,
-          touchY < offset ? target : target.nextSibling
+          e.clientY < offset ? target : target.nextSibling
         );
       }
     });
-    moveBtn.addEventListener('touchend', () => {
-      if (!draggedCard) return;
+    container.addEventListener('drop', () => {
+      if (!draggedCard || !(draggedCard instanceof Node)) return;
       updatePlaylistOrder(container);
       resetDraggingStyle(draggedCard);
+      draggedCard.removeAttribute('draggable');
       draggedCard = null;
-      container.style.overflowY = 'auto';
     });
-  });
-
-  function updatePlaylistOrder(container) {
-    const newOrder = Array.from(container.querySelectorAll('.playlist-card'))
-      .map(card => card.querySelector('.playlist-name').textContent);
-    const data = getAppData();
-    data.playlists.sort((a, b) => {
-      return newOrder.indexOf(a.name) - newOrder.indexOf(b.name);
+    container.querySelectorAll('.move-btn').forEach(moveBtn => {
+      moveBtn.addEventListener('touchstart', (e) => {
+        const card = e.target.closest('.playlist-card');
+        if (!card) return;
+        draggedCard = card;
+        applyDraggingStyle(card);
+        container.style.overflowY = 'hidden';
+      });
+      moveBtn.addEventListener('touchmove', (e) => {
+        if (!draggedCard) return;
+        const touchY = e.touches[0].clientY;
+        const target = document.elementFromPoint(e.touches[0].clientX, touchY)?.closest('.playlist-card');
+        if (target && target !== draggedCard) {
+          const bounding = target.getBoundingClientRect();
+          const offset = bounding.y + bounding.height / 2;
+          container.insertBefore(
+            draggedCard,
+            touchY < offset ? target : target.nextSibling
+          );
+        }
+      });
+      moveBtn.addEventListener('touchend', () => {
+        if (!draggedCard) return;
+        updatePlaylistOrder(container);
+        resetDraggingStyle(draggedCard);
+        draggedCard = null;
+        container.style.overflowY = 'auto';
+      });
     });
-    setAppData(data);
-    renderPlaylistsView();
-  }
 
-  function applyDraggingStyle(card) {
-    card.classList.add('dragging');
-    card.style.opacity = '0.6';
-    card.style.border = '2px dashed wheat';
-  }
+    function updatePlaylistOrder(container) {
+      const newOrder = Array.from(container.querySelectorAll('.playlist-card'))
+        .map(card => card.querySelector('.playlist-name').textContent);
+      const data = getAppData();
+      data.playlists.sort((a, b) => {
+        return newOrder.indexOf(a.name) - newOrder.indexOf(b.name);
+      });
+      setAppData(data);
+      renderPlaylistsView();
+    }
 
-  function resetDraggingStyle(card) {
-    card.classList.remove('dragging');
-    card.style.opacity = '1';
-    card.style.border = 'inherit';
+    function applyDraggingStyle(card) {
+      card.classList.add('dragging');
+      card.style.opacity = '0.6';
+      card.style.border = '2px dashed wheat';
+    }
+
+    function resetDraggingStyle(card) {
+      card.classList.remove('dragging');
+      card.style.opacity = '1';
+      card.style.border = 'inherit';
+    }
   }
 }
+
 
 

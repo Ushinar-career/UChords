@@ -1,5 +1,8 @@
 const STORAGE_KEY = 'UChordsData';
 
+// ==============================
+// Storage Hangling Logic
+// ==============================
 export function getAppData() {
   const raw = localStorage.getItem(STORAGE_KEY);
   return raw ? JSON.parse(raw) : { playlists: [] };

@@ -76,7 +76,7 @@ function renderSongsView(playlistName) {
         <input type="file" class="import-input" accept=".json" style="display: none;"/>
       </div>
       <section class="playlist-container">
-        <p class="empty-message">No Playlists yet. Create a playlist to get started.</p>
+        <p class="empty-message">🎶 No Playlists yet. Create a playlist to get started.</p>
       </section>
     `;
     initPlaylists();
@@ -299,6 +299,7 @@ function renderSongsView(playlistName) {
     }
   }
 }
+
 
 
 

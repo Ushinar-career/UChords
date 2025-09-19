@@ -9,7 +9,7 @@ const urlsToCache = [
   './scripts/storage.js',
   './scripts/utils.js',
   './scripts/viewer.js',
-  './assets/images/icon.png'
+  './assets/images/icon.svg'
 ];
 
 self.addEventListener('install', event => {
@@ -23,3 +23,4 @@ self.addEventListener('fetch', event => {
     caches.match(event.request).then(response => response || fetch(event.request))
   );
 });
+

@@ -84,10 +84,8 @@ function setupAutoScroll(overlay) {
       clearInterval(overlay._scrollInterval);
       overlay._scrollInterval = null;
       scrollBtn.querySelector('h2').textContent = 'Scroll';
-      scrollBtn.style.color = 'inherit';
     } else {
-      scrollBtn.querySelector('h2').textContent = '■';
-      scrollBtn.style.color = 'red';
+      scrollBtn.querySelector('h2').textContent = 'Stop';
       startAutoScroll();
     }
   });
@@ -184,7 +182,6 @@ songText.addEventListener('touchend', () => {
       clearInterval(overlay._scrollInterval);
       overlay._scrollInterval = null;
       scrollBtn.querySelector('h2').textContent = 'Scroll';
-      scrollBtn.style.color = 'inherit';
     }
 
     if (isEditing) {

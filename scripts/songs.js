@@ -21,7 +21,7 @@ function renderSongsView(playlistName) {
   createButtonRow.className = 'button-row';
   const createSongBtn = document.createElement('button');
   createSongBtn.className = 'create-song-btn border-btn';
-  createSongBtn.innerHTML = '<h2>➕ Create Song</h2>';
+  createSongBtn.innerHTML = '<h2>✚ Create Song</h2>';
   createSongBtn.addEventListener('click', () => {
     initInputModal({
       title: 'Create a Song',
@@ -64,15 +64,15 @@ function renderSongsView(playlistName) {
   });
   const createBackBtn = document.createElement('button');
   createBackBtn.className = 'back-btn border-btn';
-  createBackBtn.innerHTML = '<h2>🔙</h2>';
+  createBackBtn.innerHTML = '<p>⮜ Back</p>';
   createBackBtn.addEventListener('click', () => {
     createMainContent.innerHTML = `
       <div class="button-row">
         <button class="create-btn border-btn">
-          <h2>➕ Create Playlist</h2>
+          <h2>✚ Create Playlist</h2>
         </button>
-        <button class="import-btn border-btn">Import</button>
-        <button class="export-btn border-btn">Export</button>
+        <button class="import-btn border-btn">⬇ Import</button>
+        <button class="export-btn border-btn">⬆ Export</button>
         <input type="file" class="import-input" accept=".json" style="display: none;"/>
       </div>
       <section class="playlist-container">

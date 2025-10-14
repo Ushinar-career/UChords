@@ -38,7 +38,6 @@ function renderViewer(songName, songContent) {
   overlay.querySelector('.close-btn').addEventListener('click', () => overlay.remove());
   return overlay;
 }
-
 function setupAutoScroll(overlay) {
   const scrollBtn = overlay.querySelector('.scroll-btn');
   const speedInput = overlay.querySelector('.speed-input');
@@ -47,6 +46,7 @@ function setupAutoScroll(overlay) {
   const viewerContainer = overlay.querySelector('.viewer-container');
 
   overlay._scrollInterval = null;
+  overlay._isEditing = false; // track edit mode
 
   function startAutoScroll() {
     const speed = parseFloat(speedInput.value);
@@ -67,9 +67,7 @@ function setupAutoScroll(overlay) {
         scrollBtn.querySelector('h2').textContent = 'Scroll';
         scrollBtn.style.color = 'wheat';
 
-        // Disable scroll button at bottom
-        scrollBtn.classList.add('disabled');
-        scrollBtn.disabled = true;
+        updateScrollButtonState(overlay);
       }
     }, 100);
   }
@@ -84,6 +82,41 @@ function setupAutoScroll(overlay) {
     }
   }
 
+  // --- Press-and-hold helper for + / - buttons ---
+function setupHoldButton(button, delta) {
+  let holdTimeout;
+  let holdInterval;
+
+  const start = (e) => {
+    e.preventDefault();
+
+    // Immediate single step
+    adjustSpeed(delta);
+
+    // Start a delay before repeating
+    holdTimeout = setTimeout(() => {
+      holdInterval = setInterval(() => adjustSpeed(delta), 100); // repeat rate
+    }, 400); // initial delay before repeat starts
+  };
+
+  const stop = () => {
+    clearTimeout(holdTimeout);
+    clearInterval(holdInterval);
+  };
+
+  button.addEventListener('mousedown', start);
+  button.addEventListener('touchstart', start);
+
+  ['mouseup', 'mouseleave', 'touchend', 'touchcancel'].forEach(evt => {
+    button.addEventListener(evt, stop);
+  });
+}
+
+
+  setupHoldButton(decreaseBtn, -0.1);
+  setupHoldButton(increaseBtn, +0.1);
+
+  // --- Scroll button toggle ---
   scrollBtn.addEventListener('click', () => {
     if (scrollBtn.disabled) return; // don’t allow click if disabled
 
@@ -100,8 +133,7 @@ function setupAutoScroll(overlay) {
     }
   });
 
-  decreaseBtn.addEventListener('click', () => adjustSpeed(-0.1));
-  increaseBtn.addEventListener('click', () => adjustSpeed(0.1));
+  // --- Manual input via Enter key ---
   speedInput.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
       let newSpeed = parseFloat(speedInput.value);
@@ -116,17 +148,9 @@ function setupAutoScroll(overlay) {
     }
   });
 
-  // 🔑 NEW: Listen for manual scrolls
+  // --- Listen for manual scrolls ---
   viewerContainer.addEventListener('scroll', () => {
-    const atBottom = viewerContainer.scrollTop + viewerContainer.clientHeight >= viewerContainer.scrollHeight;
-
-    if (atBottom) {
-      scrollBtn.classList.add('disabled');
-      scrollBtn.disabled = true;
-    } else {
-      scrollBtn.classList.remove('disabled');
-      scrollBtn.disabled = false;
-    }
+    updateScrollButtonState(overlay);
   });
 
   // Initial state check
@@ -136,13 +160,23 @@ function setupAutoScroll(overlay) {
   window.addEventListener('resize', () => updateScrollButtonState(overlay));
 }
 
+
+
 function updateScrollButtonState(overlay) {
   const viewerContainer = overlay.querySelector('.viewer-container');
   const scrollBtn = overlay.querySelector('.scroll-btn');
 
-  const isScrollable = viewerContainer.scrollHeight > viewerContainer.clientHeight;
+  // If editing, always disable
+  if (overlay._isEditing) {
+    scrollBtn.classList.add('disabled');
+    scrollBtn.disabled = true;
+    return;
+  }
 
-  if (isScrollable) {
+  const isScrollable = viewerContainer.scrollHeight > viewerContainer.clientHeight;
+  const atBottom = viewerContainer.scrollTop + viewerContainer.clientHeight >= viewerContainer.scrollHeight;
+
+  if (isScrollable && !atBottom) {
     scrollBtn.classList.remove('disabled');
     scrollBtn.disabled = false;
   } else {
@@ -150,6 +184,7 @@ function updateScrollButtonState(overlay) {
     scrollBtn.disabled = true;
   }
 }
+
 
 export function setupEditLogic(overlay, playlistName, songName) {
   const editBtn = overlay.querySelector('.edit-btn');
@@ -217,20 +252,23 @@ export function setupEditLogic(overlay, playlistName, songName) {
       clearInterval(overlay._scrollInterval);
       overlay._scrollInterval = null;
       scrollBtn.querySelector('h2').textContent = 'Scroll';
+      scrollBtn.style.color = 'wheat';
     }
 
     if (isEditing) {
+      // Leaving edit mode
+      overlay._isEditing = false;
       songText.setAttribute('contenteditable', 'false');
       songText.style.cursor = 'zoom-in';
       editBtn.textContent = 'Edit';
       saveSongContent(songText.innerText);
 
-      scrollBtn.classList.remove('disabled');
       closeBtn.classList.remove('disabled');
 
-      // Re-check scrollability after saving
       updateScrollButtonState(overlay);
     } else {
+      // Entering edit mode
+      overlay._isEditing = true;
       songText.setAttribute('contenteditable', 'true');
       songText.style.cursor = 'text';
       songText.style.fontSize = `${currentFontSize}px`;
@@ -247,7 +285,9 @@ export function setupEditLogic(overlay, playlistName, songName) {
       selection.addRange(range);
 
       editBtn.textContent = 'Save';
+
       scrollBtn.classList.add('disabled');
+      scrollBtn.disabled = true;
       closeBtn.classList.add('disabled');
     }
   });

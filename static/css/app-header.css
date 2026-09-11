@@ -1,0 +1,26 @@
+/* static/styles/app-header.css */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: var(--border);
+}
+
+.app-header .header-left {
+  display: flex;
+  padding-left: 0.3rem;
+}
+
+.app-header .header-right {
+  padding-right: 0.3rem;
+}
+
+.logo {
+  height: 1.5rem;
+  width: 1.5rem;
+  cursor: pointer;
+}
+
+.logo:hover {
+  transform: scale(1.2);
+}

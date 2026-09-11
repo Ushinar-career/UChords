@@ -1,54 +1,37 @@
+<!-- static\index.html -->
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <meta name="description" content="UChords">
-    <link rel="manifest" href="./manifest.json">
-    <title>UChords</title>
-    <link rel="stylesheet" href="styles.css" />
-    <link rel="icon" type="image/png" href="assets/images/favicon.png">
 
-  </head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="UChords">
+  <link rel="manifest" href="/manifest.json">
+  <title>UChords</title>
+  <link rel="icon" type="image/png" href="/static/assets/images/favicon.png">
 
-  <body>
-    <div class="global-loader">
-      <div class="spinner"></div>
-      <p>Loading UChords...</p>
-    </div>
+  <link rel="stylesheet" href="/static/css/global.css" />
+  <link rel="stylesheet" href="/static/css/app-header.css" />
+  <link rel="stylesheet" href="/static/css/app-body.css" />
+  <link rel="stylesheet" href="/static/css/utils.css" />
+</head>
 
-    <header class="header-bar">
-      <div class="app-title">
-        <img class="logo" src="assets/images/icon.svg" alt="UChords Icon">
-        <h1>UChords</h1>
-      </div>
-    </header>
+<body>
+  <div class="app-loader">
+    <div class="spinner"></div>
+    <p>Loading UChords...</p>
+  </div>
 
-    <main class="main-content">
-      <div class="button-row">
-        <button class="create-btn border-btn">
-          <h2>✚ Create Playlist</h2>
-        </button>
-        <button class="import-btn border-btn">⬇ Import</button>
-        <button class="export-btn border-btn">⬆ Export</button>
-        <input type="file" class="import-input" accept=".json" style="display: none;"/>
-      </div>
-      <section class="playlist-container">
-        <p class="empty-message">🎶 No Playlists yet. Create a Playlist to get started.</p>
-        <!-- Playlist cards will be injected here dynamically -->
-        <!-- All following HTML screens are injected using JS functions -->
-      </section>
-    </main>
+  <header class="app-header">
+  </header>
 
-    <footer class="footer">
-      <p>©2025. All rights reserved.</p>
-    </footer>
+  <main class="app-body">
+  </main>
 
-    <script type="module" src="scripts/init.js"></script>
-  </body>
+  <footer class="app-footer">
+  </footer>
+
+  <script type="module" src="/static/js/main.js"></script>
+</body>
+
 </html>
-
-
-<!-- remember scroll speed for songs
-    remember zoom level for songs-- >
-

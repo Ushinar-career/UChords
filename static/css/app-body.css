@@ -1,0 +1,219 @@
+/* static/styles/app-body.css */
+.app-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  align-items: center;
+}
+
+.body-options-ribbon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.3rem;
+}
+
+.back-to-songs-btn,
+.back-to-playlists-btn,
+.edit-btn,
+.fullscreen-btn {
+  padding: 0.3rem;
+  border: var(--border);
+  border-radius: var(--radius-rounded-sm);
+}
+
+.back-to-songs-btn:hover,
+.back-to-playlists-btn:hover,
+.edit-btn:hover,
+.fullscreen-btn:hover {
+  transform: scale(1.03);
+  border: var(--border-hover);
+}
+
+.create-playlist-btn,
+.create-song-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem;
+  border: var(--border);
+  border-radius: var(--radius-rounded-sm);
+}
+
+.create-playlist-btn:hover,
+.create-song-btn:hover {
+  transform: scale(1.03);
+  border: var(--border-hover);
+  cursor: pointer;
+}
+
+.playlist-delete-btn,
+.song-delete-btn {
+  color: red;
+}
+
+.body-cards-container {
+  position: absolute;
+  top: 7.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  height: 81%;
+  width: 100%;
+  padding: 0.3rem 1rem;
+  color: red;
+  font-family: var(--font-family);
+  overflow-y: auto !important;
+}
+
+.empty-message {
+  width: 100%;
+  text-align: center;
+}
+
+.playlist-text,
+.song-text {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: auto;
+}
+
+.playlist-name-ribbon,
+.song-name-ribbon {
+  width: 100%;
+  padding: 0 0.3rem;
+  text-align: center;
+  white-space: nowrap;
+  overflow: auto;
+}
+
+.playlist-card,
+.song-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 93%;
+  height: fit-content;
+  border: var(--border);
+  border-radius: var(--radius-rounded-sm);
+  color: var(--primary-color);
+  padding: 1rem;
+}
+
+.playlist-card:hover,
+.song-card:hover {
+  transform: scale(1.03);
+  border: var(--border-hover);
+  cursor: pointer;
+}
+
+.playlist-card.dragging,
+.song-card.dragging {
+  border: 1px dashed var(--hover-color);
+  opacity: 0.9;
+}
+
+.song-data {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.editor {
+  width: 100%;
+  height: 100% !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+}
+
+.editor-options {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.3rem;
+  height: 3rem;
+  width: 90%;
+  margin: 0.5rem 0.3rem;
+}
+
+.editor-scroll-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border: var(--border-hover);
+  border-radius: var(--radius-rounded-sm);
+  padding: 0.3rem;
+}
+
+.editor-scroll-btn:hover {
+  transform: scale(1.03);
+  cursor: pointer;
+}
+
+.scroll-active {
+  color: red;
+  font-weight: bold;
+}
+
+.scroll-inactive {
+  color: wheat;
+}
+
+.speed-input {
+  padding: 0.3rem;
+  font-size: 1.5rem;
+  width: 3rem;
+  text-align: center;
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.speed-decrease,
+.speed-increase {
+  font-size: 1.2rem;
+}
+
+.editor-scroll-options {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.editor-content {
+  width: 99%;
+  height: 100%;
+  border: var(--border);
+  border-radius: var(--radius-rounded-sm);
+  overflow: hidden;
+}
+
+
+.editor-text {
+  padding: 1rem;
+  width: 100%;
+  height: 93%;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: monospace;
+  outline: none;
+  cursor: zoom-in;
+  touch-action: manipulation;
+  overflow-y: auto;
+}
+
+pre {
+  background-color: #222;
+  overflow: hidden;
+}

@@ -1,17 +1,25 @@
-// static\js\components\app-storage\local-storage.js
-export function savePlaylist(name) {
-  const playlists = JSON.parse(localStorage.getItem("playlists")) || [];
-  playlists.push({ name });
-  localStorage.setItem("playlists", JSON.stringify(playlists));
-}
+// static/js/components/app-storage/local-storage.js
 
 export function getPlaylists() {
-  return JSON.parse(localStorage.getItem("playlists")) || [];
+  const data = JSON.parse(localStorage.getItem("playlistsData")) || { playlists: [] };
+  return data.playlists;
 }
+
+export function setPlaylists(playlists) {
+  localStorage.setItem("playlistsData", JSON.stringify({ playlists }));
+}
+
+export function savePlaylist(name) {
+  const playlists = getPlaylists();
+  // Add new playlist at the front
+  const updated = [{ name, songs: [] }, ...playlists];
+  setPlaylists(updated);
+}
+
 
 export function saveSong(playlistName, songData) {
   const playlists = getPlaylists();
-  const updated = playlists.map(p => {
+  const updatedPlaylists = playlists.map(p => {
     if (p.name === playlistName) {
       const songs = p.songs || [];
       songs.push({
@@ -25,7 +33,7 @@ export function saveSong(playlistName, songData) {
     }
     return p;
   });
-  localStorage.setItem("playlists", JSON.stringify(updated));
+  setPlaylists(updatedPlaylists);
 }
 
 export function getSongs(playlistName) {

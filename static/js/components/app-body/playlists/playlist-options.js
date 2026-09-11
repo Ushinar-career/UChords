@@ -1,5 +1,5 @@
 // static/js/components/app-body/playlists/playlist-options.js
-import { getPlaylists } from "../../app-storage/local-storage.js";
+import { getPlaylists, setPlaylists } from "../../app-storage/local-storage.js";
 import { initSongs } from "../../app-body/songs/songs.js";
 
 function getDragAfterElement(container, y) {
@@ -27,7 +27,7 @@ export function attachPlaylistOptions(body, rerenderFn) {
       e.stopPropagation();
       if (!confirm(`Delete "${playlistName}"?`)) return;
       const updated = getPlaylists().filter(p => p.name !== playlistName);
-      localStorage.setItem("playlists", JSON.stringify(updated));
+      setPlaylists(updated);
       rerenderFn(body);
     });
 
@@ -37,9 +37,9 @@ export function attachPlaylistOptions(body, rerenderFn) {
       const newName = prompt("Enter new name:", playlistName);
       if (newName && newName.trim()) {
         const updated = getPlaylists().map(p =>
-          p.name === playlistName ? { name: newName.trim() } : p
+          p.name === playlistName ? { ...p, name: newName.trim() } : p
         );
-        localStorage.setItem("playlists", JSON.stringify(updated));
+        setPlaylists(updated);
         rerenderFn(body);
       }
     });
@@ -88,7 +88,7 @@ export function attachPlaylistOptions(body, rerenderFn) {
     const playlists = getPlaylists();
     const updated = newOrderNames.map(name => playlists.find(p => p.name === name));
 
-    localStorage.setItem("playlists", JSON.stringify(updated.reverse()));
+    setPlaylists(updated);
     rerenderFn(body);
   });
 }

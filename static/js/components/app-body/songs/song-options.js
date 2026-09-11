@@ -1,5 +1,5 @@
 // static/js/components/app-body/songs/song-options.js
-import { getSongs, getPlaylists } from "../../app-storage/local-storage.js";
+import { getSongs, getPlaylists, setPlaylists } from "../../app-storage/local-storage.js";
 import { initEditor } from "../editor/editor.js";
 
 function getDragAfterElement(container, y) {
@@ -36,7 +36,7 @@ export function attachSongOptions(container, playlistName, rerenderFn) {
       const updatedPlaylists = playlists.map(p =>
         p.name === playlistName ? { ...p, songs: updatedSongs } : p
       );
-      localStorage.setItem("playlists", JSON.stringify(updatedPlaylists));
+      setPlaylists(updatedPlaylists);
       rerenderFn(container, playlistName);
     });
 
@@ -58,7 +58,13 @@ export function attachSongOptions(container, playlistName, rerenderFn) {
 
       const updatedSongs = getSongs(playlistName).map(s =>
         s.name === song.name && s.artist === song.artist
-          ? { name: trimmedName, artist: newArtist.trim(), country: newCountry.trim(), language: newLanguage.trim(), content: song.content || "" }
+          ? {
+              ...s,
+              name: trimmedName,
+              artist: newArtist.trim(),
+              country: newCountry.trim(),
+              language: newLanguage.trim()
+            }
           : s
       );
 
@@ -66,7 +72,7 @@ export function attachSongOptions(container, playlistName, rerenderFn) {
       const updatedPlaylists = playlists.map(p =>
         p.name === playlistName ? { ...p, songs: updatedSongs } : p
       );
-      localStorage.setItem("playlists", JSON.stringify(updatedPlaylists));
+      setPlaylists(updatedPlaylists);
       rerenderFn(container, playlistName);
     });
 
@@ -118,7 +124,7 @@ export function attachSongOptions(container, playlistName, rerenderFn) {
     const updatedPlaylists = playlists.map(p =>
       p.name === playlistName ? { ...p, songs: newOrder } : p
     );
-    localStorage.setItem("playlists", JSON.stringify(updatedPlaylists));
+    setPlaylists(updatedPlaylists);
     rerenderFn(container, playlistName);
   });
 }

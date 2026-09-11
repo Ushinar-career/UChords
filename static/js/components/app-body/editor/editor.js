@@ -1,5 +1,5 @@
 // static/js/components/app-body/editor/editor.js
-import { getPlaylists } from "../../app-storage/local-storage.js";
+import { getPlaylists, setPlaylists } from "../../app-storage/local-storage.js";
 import { initSongs } from "../songs/songs.js";
 
 export function initEditor(container, playlistName, songName, songContent) {
@@ -199,7 +199,7 @@ function setupEditLogic(overlay, playlistName, songName) {
       }
       return p;
     });
-    localStorage.setItem("playlists", JSON.stringify(updatedPlaylists));
+    setPlaylists(updatedPlaylists);
   }
 
   songText.addEventListener("paste", (event) => {

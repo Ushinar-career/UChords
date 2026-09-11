@@ -18,7 +18,7 @@ export function renderPlaylistsHTML() {
   if (!playlists || playlists.length === 0) {
     html += `<p class="empty-message">No Playlists Yet!</p>`;
   } else {
-    playlists.slice().reverse().forEach((playlist, index) => {
+    playlists.forEach((playlist, index) => {
       html += `
         <div class="playlist-card" draggable="true" data-index="${index}">
           <div class="playlist-text">
@@ -37,3 +37,4 @@ export function renderPlaylistsHTML() {
   html += `</div>`;
   return html;
 }
+

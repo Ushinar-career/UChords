@@ -9,7 +9,7 @@ export function initHeader(body) {
     header.innerHTML = `
       <div class="header-left">
         <h1>
-          <img class="logo" src="static/assets/images/icon.png" alt="Logo" title="UChords">
+          <img class="logo" src="../static/assets/images/icon.png" alt="Logo" title="UChords">
           UChords
         </h1>
       </div>
@@ -53,7 +53,7 @@ export function initHeader(body) {
         reader.onload = ev => {
           try {
             const imported = JSON.parse(ev.target.result);
-            localStorage.setItem("playlists", JSON.stringify(imported));
+            localStorage.setItem("playlistsData", JSON.stringify(imported));
             initPlaylists(body);
           } catch (err) {
             alert("Invalid JSON file");

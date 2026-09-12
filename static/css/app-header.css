@@ -4,20 +4,19 @@
   align-items: center;
   justify-content: space-between;
   border-bottom: var(--border);
+  padding: 0 0.3rem;
 }
 
-.app-header .header-left {
-  display: flex;
-  padding-left: 0.3rem;
-}
-
+.app-header .header-left,
 .app-header .header-right {
-  padding-right: 0.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .logo {
-  height: 1.5rem;
-  width: 1.5rem;
+  height: 1.8rem;
+  width: 1.8rem;
   cursor: pointer;
 }
 

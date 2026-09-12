@@ -8,8 +8,8 @@ export function initHeader(body) {
   if (header) {
     header.innerHTML = `
       <div class="header-left">
+        <img class="logo" src="static/assets/images/icon.png" alt="Logo" title="UChords">
         <h1>
-          <img class="logo" src="static/assets/images/icon.png" alt="Logo" title="UChords">
           UChords
         </h1>
       </div>

@@ -4,9 +4,9 @@ import { getPlaylists, setPlaylists } from "../../app-storage/local-storage.js";
 export function setupEditorOptions(overlay, playlistName, songName) {
   setupAutoScroll(overlay);
   setupEditLogic(overlay, playlistName, songName);
+  setupFullscreen(overlay);
 }
 
-// --- Auto Scroll ---
 function setScrollButtonState(scrollBtn, isScrolling) {
   if (isScrolling) {
     scrollBtn.innerHTML = `<h3>Stop Scroll</h3>`;
@@ -143,15 +143,39 @@ function updateScrollButtonState(overlay) {
   }
 }
 
-// --- Edit Logic ---
+export function initChords(editorContent) {
+  const lines = editorContent.split("\n");
+  let output = "";
+
+  for (let line of lines) {
+    let chordLine = "";
+    let lyricLine = "";
+    let i = 0;
+
+    while (i < line.length) {
+      if (line[i] === "[") {
+        let end = line.indexOf("]", i);
+        let chord = line.slice(i + 1, end);
+        chordLine += chord.padEnd(end - i + 1, " ");
+        i = end + 1;
+      } else {
+        chordLine += " ";
+        lyricLine += line[i];
+        i++;
+      }
+    }
+
+    output += `<span class="chords">${chordLine}</span>\n<span class="lyrics">${lyricLine}</span>\n`;
+  }
+
+  return `<pre class="editor-text">${output}</pre>`;
+}
+
 function setupEditLogic(overlay, playlistName, songName) {
   const editBtn = overlay.querySelector(".edit-btn");
-  const songText = overlay.querySelector(".editor-text");
   const scrollBtn = overlay.querySelector(".editor-scroll-btn");
   const backBtn = overlay.querySelector(".back-to-songs-btn");
   let currentFontSize = 16;
-
-  songText.style.fontSize = `${currentFontSize}px`;
 
   function sanitizeContent(raw) {
     const stripped = raw.replace(/<\/?[^>]+(>|$)/g, "");
@@ -170,16 +194,13 @@ function setupEditLogic(overlay, playlistName, songName) {
       return p;
     });
     setPlaylists(updatedPlaylists);
+
+    const parsed = initChords(content);
+    overlay.querySelector(".editor-content").innerHTML = parsed;
   }
 
-  songText.addEventListener("paste", (event) => {
-    event.preventDefault();
-    const text = event.clipboardData.getData("text/plain");
-    document.execCommand("insertText", false, text);
-  });
-
   editBtn.addEventListener("click", () => {
-    const isEditing = songText.getAttribute("contenteditable") === "true";
+    const isEditing = overlay._isEditing;
 
     if (overlay._scrollInterval !== null) {
       clearInterval(overlay._scrollInterval);
@@ -188,39 +209,55 @@ function setupEditLogic(overlay, playlistName, songName) {
     }
 
     if (isEditing) {
+      const rawContent = overlay.querySelector(".editor-text").innerText;
       overlay._isEditing = false;
-      songText.setAttribute("contenteditable", "false");
-      songText.style.cursor = "zoom-in";
-      editBtn.textContent = "edit";
-      saveSongContent(songText.innerText);
+      editBtn.textContent = "edit_document";
+      saveSongContent(rawContent);
       backBtn.classList.remove("disabled");
       updateScrollButtonState(overlay);
     } else {
       overlay._isEditing = true;
-      songText.setAttribute("contenteditable", "true");
-      songText.style.cursor = "text";
-      songText.style.fontSize = `${currentFontSize}px`;
-      songText.focus();
+      const playlists = getPlaylists();
+      const currentSong = playlists
+        .find(p => p.name === playlistName)
+        ?.songs.find(s => s.name === songName);
+
+      const rawContent = currentSong?.content || "";
+      overlay.querySelector(".editor-content").innerHTML =
+        `<pre class="editor-text" contenteditable="true">${rawContent}</pre>`;
+
+      const newSongText = overlay.querySelector(".editor-text");
+      newSongText.style.cursor = "text";
+      newSongText.style.fontSize = `${currentFontSize}px`;
+      newSongText.focus();
+
       editBtn.textContent = "save";
       scrollBtn.classList.add("disabled");
       scrollBtn.disabled = true;
       backBtn.classList.add("disabled");
     }
   });
+}
 
-  songText.addEventListener("pointerdown", (e) => {
-    const isEditing = songText.getAttribute("contenteditable") === "true";
-    if (isEditing) return;
-    if (e.pointerType !== "mouse") return;
+function setupFullscreen(overlay) {
+  const fullscreenBtn = overlay.querySelector(".fullscreen-btn");
 
-    if (e.button === 0) {
-      currentFontSize = Math.min(currentFontSize + 3, 48);
-    } else if (e.button === 2) {
-      currentFontSize = Math.max(currentFontSize - 3, 8);
+  fullscreenBtn.addEventListener("click", () => {
+    if (!document.fullscreenElement) {
+      overlay.requestFullscreen().then(() => {
+        fullscreenBtn.textContent = "close_fullscreen";
+      });
+    } else {
+      document.exitFullscreen().then(() => {
+        fullscreenBtn.textContent = "open_in_full";
+      });
     }
-    songText.style.fontSize = `${currentFontSize}px`;
   });
 
-  songText.addEventListener("contextmenu", (e) => e.preventDefault());
+  document.addEventListener("fullscreenchange", () => {
+    if (!document.fullscreenElement) {
+      fullscreenBtn.textContent = "open_in_full";
+    }
+  });
 }
 

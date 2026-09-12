@@ -86,7 +86,6 @@
 .playlist-name-ribbon,
 .song-name-ribbon {
   width: 100%;
-  padding: 0.3rem;
   text-align: center;
   white-space: nowrap;
   overflow: auto;
@@ -140,7 +139,6 @@
   gap: 0.3rem;
   height: 3rem;
   width: 90%;
-  margin: 0.5rem 0.3rem;
 }
 
 .editor-scroll-btn {
@@ -200,7 +198,6 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .editor-text {
-  padding: 1rem;
   width: 100%;
   height: 93%;
   white-space: pre-wrap;
@@ -213,6 +210,20 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 pre {
+  padding: 1rem;
   background-color: var(--background-color);
   overflow: hidden;
 }
+
+.chords {
+  color: var(--hover-color);
+}
+/* 
+.fullscreen-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  cursor: pointer;
+  font-size: 24px;
+  z-index: 99999999;
+} */

@@ -12,7 +12,7 @@ export function renderEditor(container, playlistName, songName, songContent) {
         <input type="number" class="speed-input" min="0.1" max="5" step="0.1" value="1.0"/>
         <span class="material-icons speed-increase" title="Increase Speed">add</span>
       </div>
-      <span class="material-icons edit-btn" title="Edit Song">edit</span>
+      <span class="material-icons edit-btn" title="Edit Song">edit_document</span>
       <span class="material-icons fullscreen-btn" title="Full Screen editor">open_in_full</span>
     </div>
     <h3 class="song-name-ribbon">Showing song: <i>${songName}</i></h3>

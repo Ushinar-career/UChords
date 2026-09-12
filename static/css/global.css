@@ -151,6 +151,12 @@ input:hover {
   position: absolute;
   bottom: 0;
   left: 50%;
+  display: flex;
+  justify-content: center;
+  align-self: center;
+  transform: translate(-50%);
+  width: 99%;
+  border-top: var(--border);
   background-color: var(--bg-color);
   font-size: 9px;
 }

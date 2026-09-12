@@ -60,8 +60,8 @@ export function initSongModal(container, playlistName) {
     const country = modal.querySelector(".song-country-input").value.trim();
     const language = modal.querySelector(".song-language-input").value.trim();
 
-    if (!name || !artist) {
-      alert("Song name and artist are required!");
+    if (!name) {
+      alert("Song name is required!");
       return;
     }
 

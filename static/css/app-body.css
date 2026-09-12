@@ -86,7 +86,7 @@
 .playlist-name-ribbon,
 .song-name-ribbon {
   width: 100%;
-  padding: 0 0.3rem;
+  padding: 0.3rem;
   text-align: center;
   white-space: nowrap;
   overflow: auto;
@@ -199,7 +199,6 @@ input[type=number]::-webkit-outer-spin-button {
   overflow: hidden;
 }
 
-
 .editor-text {
   padding: 1rem;
   width: 100%;
@@ -214,6 +213,6 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 pre {
-  background-color: #222;
+  background-color: var(--background-color);
   overflow: hidden;
 }

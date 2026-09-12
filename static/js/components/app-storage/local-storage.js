@@ -1,5 +1,4 @@
 // static/js/components/app-storage/local-storage.js
-
 export function getPlaylists() {
   const data = JSON.parse(localStorage.getItem("playlistsData")) || { playlists: [] };
   return data.playlists;
@@ -11,11 +10,9 @@ export function setPlaylists(playlists) {
 
 export function savePlaylist(name) {
   const playlists = getPlaylists();
-  // Add new playlist at the front
   const updated = [{ name, songs: [] }, ...playlists];
   setPlaylists(updated);
 }
-
 
 export function saveSong(playlistName, songData) {
   const playlists = getPlaylists();
@@ -23,6 +20,7 @@ export function saveSong(playlistName, songData) {
     if (p.name === playlistName) {
       const songs = p.songs || [];
       songs.push({
+        id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
         name: songData.name,
         artist: songData.artist,
         country: songData.country,

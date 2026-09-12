@@ -34,7 +34,7 @@ export function renderSongCards(container, playlistName) {
     card.innerHTML = `
       <div class="song-text">
         <h3>${song.name}</h3>
-        <p>Artist: ${song.artist || ""}</p>
+        <p>Artist: ${song.artist || "N/A"}</p>
         <div class="song-data">
           <p>Country: ${song.country || "N/A"}</p>
           <p>Language: ${song.language || "N/A"}</p>

@@ -18,5 +18,4 @@ document.addEventListener("DOMContentLoaded", async function () {
       .then(() => console.log("Service Worker registered"))
       .catch(err => console.error("Service Worker failed:", err));
   }
-
 });

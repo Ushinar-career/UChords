@@ -23,8 +23,10 @@ export function initHeader(body) {
     const importBtn = header.querySelector(".download-icon");
 
     const playlists = getPlaylists();
-    if (playlists.length > 0) {
-      exportBtn.classList.remove("disabled");
+    if (playlists) {
+      if (playlists.length > 0) {
+        exportBtn.classList.remove("disabled");
+      }
     }
 
     exportBtn.addEventListener("click", () => {
@@ -41,45 +43,47 @@ export function initHeader(body) {
       URL.revokeObjectURL(url);
     });
 
-    importBtn.addEventListener("click", () => {
-      const input = document.createElement("input");
-      input.type = "file";
-      input.accept = "application/json";
-      input.onchange = e => {
-        const file = e.target.files[0];
-        if (!file) return;
+importBtn.addEventListener("click", () => {
+  const proceed = confirm("Importing will remove your current playlists. Do you want to continue?");
+  if (!proceed) return;
 
-        const reader = new FileReader();
-        reader.onload = ev => {
-          try {
-            const imported = JSON.parse(ev.target.result);
-            localStorage.setItem("playlistsData", JSON.stringify(imported));
-            initPlaylists(body);
-          } catch (err) {
-            alert("Invalid JSON file");
-          }
-        };
-        reader.readAsText(file);
-      };
-      input.click();
-    });
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "application/json";
+  input.onchange = e => {    
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const imported = JSON.parse(ev.target.result);
+        localStorage.setItem("playlistsData", JSON.stringify(imported));
+        initHomeScreen();
+      } catch (err) {
+        alert("Failed to import playlists: " + err.message);
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+});
+
   }
-      
+
   const homeBtn = header.querySelector(".logo");
-  homeBtn.addEventListener("click", () => {  
-  const loader = document.querySelector(".app-loader");
-  loader.classList.remove("hidden")
+  homeBtn.addEventListener("click", () => {
+    const loader = document.querySelector(".app-loader");
+    loader.classList.remove("hidden")
 
-  try {
-    initHomeScreen();
-    if (loader) {
-      loader.classList.add("hidden");
+    try {
+      initHomeScreen();
+      if (loader) {
+        loader.classList.add("hidden");
+      }
+    } catch (error) {
+      console.error("Error initializing home screen:", error);
     }
-  } catch (error) {
-    console.error("Error initializing home screen:", error);
-  }
   });
 
 }
-
-

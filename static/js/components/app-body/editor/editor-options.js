@@ -5,6 +5,7 @@ export function setupEditorOptions(overlay, playlistName, songName) {
   setupAutoScroll(overlay);
   setupEditLogic(overlay, playlistName, songName);
   setupFullscreen(overlay);
+  setupSongTextZoom(overlay);
 }
 
 function setScrollButtonState(scrollBtn, isScrolling) {
@@ -261,3 +262,69 @@ function setupFullscreen(overlay) {
   });
 }
 
+// ==============================
+// Song Text Zoom Logic
+// ==============================
+export function setupSongTextZoom(overlay) {
+  const songText = overlay.querySelector(".editor-text");
+  if (!songText) return;
+
+  let currentFontSize = 16;
+  songText.style.fontSize = `${currentFontSize}px`;
+
+  let lastTapTime = 0;
+  let zoomMode = false;
+  let startY = 0;
+
+  songText.addEventListener("touchstart", (e) => {
+    const now = Date.now();
+    const timeSinceLastTap = now - lastTapTime;
+
+    if (timeSinceLastTap < 300 && e.touches.length === 1) {
+      zoomMode = true;
+      startY = e.touches[0].clientY;
+      overlay.querySelector(".editor-content").style.overflow = "hidden";
+    }
+
+    lastTapTime = now;
+  });
+
+  songText.addEventListener("touchmove", (e) => {
+    if (!zoomMode || e.touches.length !== 1) return;
+
+    const currentY = e.touches[0].clientY;
+    const deltaY = currentY - startY;
+
+    if (Math.abs(deltaY) > 5) {
+      if (deltaY < 0) {
+        currentFontSize = Math.min(currentFontSize + 1, 48);
+      } else {
+        currentFontSize = Math.max(currentFontSize - 1, 8);
+      }
+      songText.style.fontSize = `${currentFontSize}px`;
+      startY = currentY;
+    }
+  });
+
+  songText.addEventListener("touchend", () => {
+    if (zoomMode) {
+      zoomMode = false;
+      overlay.querySelector(".editor-content").style.overflow = "";
+    }
+  });
+
+  songText.addEventListener("pointerdown", (e) => {
+    const isEditing = songText.getAttribute("contenteditable") === "true";
+    if (isEditing) return;
+    if (e.pointerType !== "mouse") return;
+
+    if (e.button === 0) {
+      currentFontSize = Math.min(currentFontSize + 3, 48);
+    } else if (e.button === 2) {
+      currentFontSize = Math.max(currentFontSize - 3, 8);
+    }
+    songText.style.fontSize = `${currentFontSize}px`;
+  });
+
+  songText.addEventListener("contextmenu", (e) => e.preventDefault());
+}

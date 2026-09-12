@@ -1,7 +1,7 @@
 {
   "name": "UChords",
   "short_name": "UC",
-  "start_url": "./uchords.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#111111",

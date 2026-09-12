@@ -10,7 +10,7 @@ files = []
 for root, _, filenames in os.walk(STATIC_DIR):
     for filename in filenames:
         full_path = os.path.join(root, filename)
-        rel_path = os.path.relpath(full_path, BASE_DIR).replace("\\", "/")
+        rel_path = "./" + os.path.relpath(full_path, BASE_DIR).replace("\\", "/")
         files.append(rel_path)
 
 formatted_list = "[\n" + ",\n".join(f'  "{f}"' for f in files) + "\n]"

@@ -262,9 +262,6 @@ function setupFullscreen(overlay) {
   });
 }
 
-// ==============================
-// Song Text Zoom Logic
-// ==============================
 export function setupSongTextZoom(overlay) {
   const songText = overlay.querySelector(".editor-text");
   if (!songText) return;

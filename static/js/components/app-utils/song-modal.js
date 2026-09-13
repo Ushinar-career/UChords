@@ -26,7 +26,7 @@ export function initSongModal(container, playlistName) {
       </label>
       <div class="modal-actions">
         <span class="material-icons save-song-btn" title="Save Song">check</span>
-        <span class="material-icons close-song-modal-btn" title="Cancel" style="color:red;">close</span>
+        <span class="material-icons close-song-modal-btn" title="Cancel">close</span>
       </div>
     </div>
   `;

@@ -14,7 +14,7 @@ export function initPlaylistModal(body) {
         </label>
         <div class="modal-actions">
           <span class="material-icons save-playlist-btn" title="Save Playlist">check</span>
-          <span class="material-icons close-modal-btn" title="Cancel" style="color:red;">close</span>
+          <span class="material-icons close-modal-btn" title="Cancel">close</span>
         </div>
       </div>
     `;

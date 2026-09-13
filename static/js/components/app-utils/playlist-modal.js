@@ -14,7 +14,7 @@ export function initPlaylistModal(body) {
         </label>
         <div class="modal-actions">
           <span class="material-icons save-playlist-btn" title="Save Playlist">check</span>
-          <span class="material-icons close-modal-btn" title="Cancel">close</span>
+          <span class="material-icons close-playlist-modal-btn" title="Cancel">close</span>
         </div>
       </div>
     `;
@@ -23,7 +23,7 @@ export function initPlaylistModal(body) {
 
     const modal = modalMarkup;
     const saveIcon = modal.querySelector(".save-playlist-btn");
-    const closeIcon = modal.querySelector(".close-modal-btn");
+    const closeIcon = modal.querySelector(".close-playlist-modal-btn");
     const input = modal.querySelector(".playlist-name-input");
 
     input.addEventListener("keydown", (event) => {

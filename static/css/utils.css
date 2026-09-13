@@ -39,3 +39,13 @@
     justify-content: center;
     gap: 1rem;
 }
+
+.save-playlist-btn,
+.save-song-btn {
+    color: green;
+}
+
+.close-playlist-modal-btn,
+.close-song-modal-btn {
+    color: red;
+}

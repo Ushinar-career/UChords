@@ -8,9 +8,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     console.error("Error initializing home screen:", error);
   }
 
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./service-worker.js")
-      .then(() => console.log("Service Worker registered"))
-      .catch(err => console.error("Service Worker failed:", err));
-  }
+  // if ("serviceWorker" in navigator) {
+  //   navigator.serviceWorker.register("./service-worker.js")
+  //     .then(() => console.log("Service Worker registered"))
+  //     .catch(err => console.error("Service Worker failed:", err));
+  // }
 });

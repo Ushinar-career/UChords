@@ -14,10 +14,8 @@ export function initHeader(body) {
         </h1>
       </div>
       <div class="header-right">
-        <span class="material-icons theme-icon" title="Switch to Light Theme">light_mode</span>
         <span class="material-icons import-icon" title="Import Playlists">download</span>
         <span class="material-icons export-icon disabled" title="Export Playlists">backup</span>
-        <span class="material-icons help-icon" title="help">info</span>
       </div>
     `;
 

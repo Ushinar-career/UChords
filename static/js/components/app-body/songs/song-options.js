@@ -57,12 +57,12 @@ export function attachSongOptions(container, playlistName, rerenderFn) {
       const updatedSongs = getSongs(playlistName).map(s =>
         s.name === song?.name
           ? {
-              ...s,
-              name: trimmedName,
-              artist: newArtist.trim(),
-              country: newCountry.trim(),
-              language: newLanguage.trim()
-            }
+            ...s,
+            name: trimmedName,
+            artist: newArtist.trim(),
+            country: newCountry.trim(),
+            language: newLanguage.trim()
+          }
           : s
       );
 
@@ -98,12 +98,25 @@ export function attachSongOptions(container, playlistName, rerenderFn) {
     e.preventDefault();
     const dragging = cardsContainer.querySelector(".dragging");
     const afterElement = getDragAfterElement(cardsContainer, e.clientY);
+
     if (afterElement == null) {
       cardsContainer.appendChild(dragging);
     } else {
       cardsContainer.insertBefore(dragging, afterElement);
     }
+
+    const scrollMargin = 30;
+    const scrollSpeed = 9;
+
+    const rect = cardsContainer.getBoundingClientRect();
+
+    if (e.clientY < rect.top + scrollMargin) {
+      cardsContainer.scrollTop -= scrollSpeed;
+    } else if (e.clientY > rect.bottom - scrollMargin) {
+      cardsContainer.scrollTop += scrollSpeed;
+    }
   });
+
 
   cardsContainer.addEventListener("drop", () => {
     const newOrder = Array.from(cardsContainer.querySelectorAll(".song-card")).map(card => {

@@ -16,17 +16,12 @@
 }
 
 .back-to-songs-btn,
-.back-to-playlists-btn {
-  color: red;
-}
-
-.back-to-songs-btn,
 .back-to-playlists-btn,
 .edit-btn,
 .fullscreen-btn {
-  padding: 0.3rem;
-  border: var(--border);
-  border-radius: var(--radius-rounded-sm);
+  padding: 0.3rem !important;
+  border: var(--border) !important;
+  border-radius: var(--radius-rounded-sm) !important;
 }
 
 .back-to-songs-btn:hover,
@@ -55,9 +50,12 @@
   cursor: pointer;
 }
 
+
+.back-to-songs-btn,
+.back-to-playlists-btn,
 .playlist-delete-btn,
 .song-delete-btn {
-  color: red;
+  color: red !important;
 }
 
 .body-cards-container {
@@ -71,7 +69,6 @@
   width: 100%;
   padding: 0.3rem 1rem;
   color: red;
-  font-family: var(--font-family);
   overflow-y: auto !important;
 }
 
@@ -101,7 +98,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 93%;
+  width: 97%;
   height: fit-content;
   border: var(--border);
   border-radius: var(--radius-rounded-sm);
@@ -142,15 +139,12 @@
   justify-content: center;
   align-items: center;
   gap: 0.3rem;
-  width: 90%;
+  width: 100%;
+  padding: 0.3rem;
 }
 
 .editor-scroll-btn {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  border: var(--border-hover);
+  border: var(--border);
   border-radius: var(--radius-rounded-sm);
   padding: 0.3rem;
 }
@@ -166,14 +160,14 @@
 }
 
 .scroll-inactive {
-  color: wheat;
+  color: var(--hover-color);
 }
 
 .speed-input {
   padding: 0.3rem;
-  font-size: 1.5rem;
   width: 3rem;
   text-align: center;
+  font-weight: 900;
 }
 
 input[type=number]::-webkit-inner-spin-button,
@@ -184,7 +178,7 @@ input[type=number]::-webkit-outer-spin-button {
 
 .speed-decrease,
 .speed-increase {
-  font-size: 1.2rem;
+  font-size: 1.2rem !important;
 }
 
 .editor-scroll-options {
@@ -194,8 +188,9 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .editor-content {
-  width: 99%;
+  width: 100%;
   height: 100%;
+  margin-top: 0.3rem;
   border: var(--border);
   border-radius: var(--radius-rounded-sm);
   overflow: hidden;
@@ -206,17 +201,13 @@ input[type=number]::-webkit-outer-spin-button {
   height: 93%;
   white-space: pre-wrap;
   word-wrap: break-word;
-  font-family: monospace;
+  font-family: "Calibri";
   outline: none;
   cursor: zoom-in;
   touch-action: manipulation;
-  overflow-y: auto;
-}
-
-pre {
   padding: 1rem;
   background-color: var(--background-color);
-  overflow: hidden;
+  overflow: auto;
 }
 
 .chords {

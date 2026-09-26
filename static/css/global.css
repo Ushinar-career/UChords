@@ -1,11 +1,15 @@
 /* static\styles\global.css */
+@import url("./app-header.css");
+@import url("./app-body.css");
+@import url("./utils.css");
+
+
 :root {
-  --root-font-size: 16;
-  --primary-color: #5fbff8;
+  --primary-color: #43a3e4;
   --hover-color: wheat;
   --bg-color: #000;
   --bg-transparent: rgba(0, 0, 0, 0.6);
-  --font-family: 'Calibri';
+  --font-family: 'Quicksand';
   --border: 1px solid var(--primary-color);
   --border-hover: 1px solid var(--hover-color);
   --radius-circle: 50%;
@@ -27,7 +31,6 @@ html {
   justify-content: center;
   align-items: center;
   overflow: hidden;
-
 }
 
 body {
@@ -44,6 +47,15 @@ body {
   flex-direction: column;
   overflow: hidden;
   user-select: none;
+}
+
+body.light-mode {
+  --primary-color: #17689d;
+  --bg-color: #fff;
+  --hover-color: #000;
+  --bg-transparent: rgba(0, 0, 0, 0.6);
+  --border: 1px solid var(--primary-color);
+  --border-hover: 1px solid var(--hover-color);
 }
 
 .disabled {
@@ -83,6 +95,12 @@ body {
   font-family: 'Material Icons';
   src: url('../assets/fonts/fonts_local.woff2') format('woff2');
   font-display: block;
+}
+
+@font-face {
+font-family: 'Quicksand';
+src: url('../assets/fonts/quicksand.ttf')
+format('truetype');
 }
 
 .material-icons {
@@ -169,4 +187,8 @@ input:hover {
   100% {
     transform: rotate(360deg)
   }
+}
+
+@media screen and (max-width: 500px) { 
+  html { font-size: 14px; } 
 }

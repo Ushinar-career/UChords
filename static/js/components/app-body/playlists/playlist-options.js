@@ -22,7 +22,6 @@ export function attachPlaylistOptions(body, rerenderFn) {
   body.querySelectorAll(".playlist-card").forEach(card => {
     const playlistName = card.querySelector("h3").textContent;
 
-    // Delete
     card.querySelector(".playlist-delete-btn").addEventListener("click", e => {
       e.stopPropagation();
       if (!confirm(`Delete "${playlistName}"?`)) return;
@@ -31,7 +30,6 @@ export function attachPlaylistOptions(body, rerenderFn) {
       rerenderFn(body);
     });
 
-    // Edit
     card.querySelector(".playlist-edit-btn").addEventListener("click", e => {
       e.stopPropagation();
       const newName = prompt("Enter new name:", playlistName);
@@ -44,7 +42,6 @@ export function attachPlaylistOptions(body, rerenderFn) {
       }
     });
 
-    // Drag start/end
     const moveBtn = card.querySelector(".playlist-move-btn");
     moveBtn.style.cursor = "grab";
     moveBtn.addEventListener("mousedown", e => {
@@ -62,24 +59,36 @@ export function attachPlaylistOptions(body, rerenderFn) {
       card.style.cursor = "default";
     });
 
-    // Click to open songs
     card.addEventListener("click", () => {
       initSongs(body, playlistName);
     });
   });
 
-  // Drag/drop container logic
   const container = body.querySelector(".body-cards-container");
   container.addEventListener("dragover", e => {
     e.preventDefault();
+
     const dragging = container.querySelector(".dragging");
     const afterElement = getDragAfterElement(container, e.clientY);
+
     if (afterElement == null) {
       container.appendChild(dragging);
     } else {
       container.insertBefore(dragging, afterElement);
     }
+
+    const scrollMargin = 30;
+    const scrollSpeed = 9;
+
+    const rect = container.getBoundingClientRect();
+
+    if (e.clientY < rect.top + scrollMargin) {
+      container.scrollTop -= scrollSpeed;
+    } else if (e.clientY > rect.bottom - scrollMargin) {
+      container.scrollTop += scrollSpeed;
+    }
   });
+
 
   container.addEventListener("drop", () => {
     const newOrderNames = Array.from(container.querySelectorAll(".playlist-card"))

@@ -42,10 +42,10 @@
 
 .save-playlist-btn,
 .save-song-btn {
-    color: green;
+    color: green !important;
 }
 
 .close-playlist-modal-btn,
 .close-song-modal-btn {
-    color: red;
+    color: red !important;
 }

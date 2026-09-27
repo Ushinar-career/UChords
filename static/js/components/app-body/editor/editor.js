@@ -17,6 +17,5 @@ export function initEditor(container, playlistName, songName, songContent) {
     initSongs(container, playlistName);
   });
 
-  setupEditorOptions(overlay, playlistName, songName);
+  setupEditorOptions(overlay, playlistName, songName, songContent);
 }
-

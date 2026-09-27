@@ -187,7 +187,22 @@ input[type=number]::-webkit-outer-spin-button {
   gap: 0.3rem;
 }
 
+.editor-transpose-options{
+  position: absolute;
+  right: 0.3rem;
+  top: 8.1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: var(--background-color) !important;
+  border: var(--border);
+  border-radius: var(--radius-rounded-sm);
+
+}
+
 .editor-content {
+  position: relative;
   width: 100%;
   height: 100%;
   margin-top: 0.3rem;
@@ -201,7 +216,8 @@ input[type=number]::-webkit-outer-spin-button {
   height: 93%;
   white-space: pre-wrap;
   word-wrap: break-word;
-  font-family: "Calibri";
+  font-family: var(--font-family);
+  font-weight: 600;
   outline: none;
   cursor: zoom-in;
   touch-action: manipulation;

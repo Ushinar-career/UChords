@@ -51,7 +51,7 @@ body {
 
 body.light-mode {
   --primary-color: #17689d;
-  --bg-color: #fff;
+  --bg-color: #f5deb3;
   --hover-color: #000;
   --bg-transparent: rgba(0, 0, 0, 0.6);
   --border: 1px solid var(--primary-color);
@@ -98,8 +98,13 @@ body.light-mode {
 }
 
 @font-face {
+font-family: 'Surfer';
+src: url('../assets/fonts/Surfer.ttf')
+format('truetype');
+}
+@font-face {
 font-family: 'Quicksand';
-src: url('../assets/fonts/quicksand.ttf')
+src: url('../assets/fonts/Quicksand.ttf')
 format('truetype');
 }
 

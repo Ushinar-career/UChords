@@ -1,12 +1,29 @@
 // static/js/components/app-body/editor/editor-options.js
 import { getPlaylists, setPlaylists } from "../../app-storage/local-storage.js";
 
-export function setupEditorOptions(overlay, playlistName, songName) {
+const NOTES = [
+  "C", "C#", "D", "D#", "E", "F",
+  "F#", "G", "G#", "A", "A#", "B"
+];
+
+const FLAT_MAP = {
+  Db: "C#",
+  Eb: "D#",
+  Gb: "F#",
+  Ab: "G#",
+  Bb: "A#"
+};
+
+export function setupEditorOptions(overlay, playlistName, songName, songContent) {
   setupAutoScroll(overlay);
   setupEditLogic(overlay, playlistName, songName);
   setupFullscreen(overlay);
   setupSongTextZoom(overlay);
+  setupTranspose(overlay, songContent);
+  overlay._transpose = 0;
+
 }
+
 
 function setScrollButtonState(scrollBtn, isScrolling) {
   if (isScrolling) {
@@ -20,153 +37,115 @@ function setScrollButtonState(scrollBtn, isScrolling) {
   }
 }
 
-function setupAutoScroll(overlay) {
-  const scrollBtn = overlay.querySelector(".editor-scroll-btn");
-  const speedInput = overlay.querySelector(".speed-input");
-  const decreaseBtn = overlay.querySelector(".speed-decrease");
-  const increaseBtn = overlay.querySelector(".speed-increase");
-  const editorContainer = overlay.querySelector(".editor-content");
-  const editorText = overlay.querySelector(".editor-text");
-
-  overlay._scrollInterval = null;
-  overlay._isEditing = false;
-
-  function startAutoScroll() {
-    const speed = parseFloat(speedInput.value);
-    let accumulatedScroll = 0;
-
-    overlay._scrollInterval = setInterval(() => {
-      accumulatedScroll += speed;
-      const scrollStep = Math.floor(accumulatedScroll);
-      if (scrollStep > 0) {
-        editorText.scrollTop += scrollStep;
-        accumulatedScroll -= scrollStep;
-      }
-
-      if (editorText.scrollTop + editorText.clientHeight >= editorText.scrollHeight) {
-        clearInterval(overlay._scrollInterval);
-        overlay._scrollInterval = null;
-        setScrollButtonState(scrollBtn, false);
-        updateScrollButtonState(overlay);
-      }
-    }, 100);
-  }
-
-  function adjustSpeed(delta) {
-    let currentSpeed = parseFloat(speedInput.value);
-    let newSpeed = Math.min(5, Math.max(0.1, currentSpeed + delta));
-    speedInput.value = newSpeed.toFixed(1);
-    if (overlay._scrollInterval !== null) {
-      clearInterval(overlay._scrollInterval);
-      startAutoScroll();
-    }
-  }
-
-  function setupSpeedOptions(button, delta) {
-    let holdTimeout;
-    let holdInterval;
-
-    const start = (e) => {
-      e.preventDefault();
-      adjustSpeed(delta);
-      holdTimeout = setTimeout(() => {
-        holdInterval = setInterval(() => adjustSpeed(delta), 100);
-      }, 300);
-    };
-
-    const stop = () => {
-      clearTimeout(holdTimeout);
-      clearInterval(holdInterval);
-    };
-
-    button.addEventListener("mousedown", start);
-    button.addEventListener("touchstart", start);
-    ["mouseup", "mouseleave", "touchend", "touchcancel"].forEach((evt) => {
-      button.addEventListener(evt, stop);
-    });
-  }
-
-  setupSpeedOptions(decreaseBtn, -0.1);
-  setupSpeedOptions(increaseBtn, +0.1);
-
-  scrollBtn.addEventListener("click", () => {
-    if (scrollBtn.disabled) return;
-    const isScrolling = overlay._scrollInterval !== null;
-    if (isScrolling) {
-      clearInterval(overlay._scrollInterval);
-      overlay._scrollInterval = null;
-      setScrollButtonState(scrollBtn, false);
-    } else {
-      startAutoScroll();
-      setScrollButtonState(scrollBtn, true);
-    }
+function setupTranspose(overlay, songContent) {
+  const upBtn = overlay.querySelector(".transpose-up-btn");
+  const downBtn = overlay.querySelector(".transpose-down-btn");
+  const value = overlay.querySelector(".transpose-value");
+  const render = () => {
+    value.textContent = overlay._transpose;
+    overlay.querySelector(".editor-content")
+      .innerHTML = initChords(
+        songContent,
+        overlay._transpose
+      );
+  };
+  upBtn.addEventListener("click", () => {
+    overlay._transpose++;
+    render();
   });
+  downBtn.addEventListener("click", () => {
+    overlay._transpose--;
+    render();
+  });
+}
 
-  speedInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-      let newSpeed = parseFloat(speedInput.value);
-      if (!isNaN(newSpeed)) {
-        newSpeed = Math.min(5, Math.max(0.1, newSpeed));
-        speedInput.value = newSpeed.toFixed(1);
-        if (overlay._scrollInterval !== null) {
-          clearInterval(overlay._scrollInterval);
-          startAutoScroll();
+function transposeChord(chord, semitones) {
+  const match = chord.match(/^([A-G][b#]?)(.*)$/);
+  if (!match) return chord;
+  let [, root, suffix] = match;
+  root = FLAT_MAP[root] || root;
+  const index = NOTES.indexOf(root);
+  if (index === -1) return chord;
+  const newIndex =
+    (index + semitones + NOTES.length) % NOTES.length;
+  return NOTES[newIndex] + suffix;
+}
+
+function detectOriginalKey(editorContent) {
+  const rootCounts = {};
+  const lines = sanitizeContent(editorContent).split("\n");
+  for (const line of lines) {
+    let i = 0;
+    while (i < line.length) {
+      if (line[i] === "[") {
+        const end = line.indexOf("]", i);
+        if (end !== -1) {
+          const chord = line.slice(i + 1, end);
+          const match = chord.match(/^([A-G][b#]?)/);
+          if (match) {
+            let root = match[1];
+            root = FLAT_MAP[root] || root;
+            rootCounts[root] = (rootCounts[root] || 0) + 1;
+          }
         }
+        i = end + 1;
+        continue;
       }
+      i++;
     }
-  });
-
-  editorContainer.addEventListener("scroll", () => updateScrollButtonState(overlay));
-  updateScrollButtonState(overlay);
-  window.addEventListener("resize", () => updateScrollButtonState(overlay));
+  }
+  let bestKey = "C";
+  let bestCount = 0;
+  for (const [key, count] of Object.entries(rootCounts)) {
+    if (count > bestCount) {
+      bestCount = count;
+      bestKey = key;
+    }
+  }
+  return bestKey;
 }
 
-function updateScrollButtonState(overlay) {
-  const editorText = overlay.querySelector(".editor-text");
-  const scrollBtn = overlay.querySelector(".editor-scroll-btn");
+export function initChords(editorContent, transpose = 0) {
+  const safeContent = sanitizeContent(editorContent);
+  const lines = safeContent.split("\n");
 
-  if (!editorText) return;
+  const escapeHtml = (str) => {
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  };
 
-  if (overlay._isEditing) {
-    scrollBtn.classList.add("disabled");
-    scrollBtn.disabled = true;
-    return;
-  }
-
-  const isScrollable = editorText.scrollHeight > editorText.clientHeight;
-
-  if (isScrollable) {
-    scrollBtn.classList.remove("disabled");
-    scrollBtn.disabled = false;
-  } else {
-    scrollBtn.classList.add("disabled");
-    scrollBtn.disabled = true;
-  }
-}
-
-export function initChords(editorContent) {
-  const lines = editorContent.split("\n");
   let output = "";
 
-  for (let line of lines) {
+  for (const line of lines) {
     let chordLine = "";
     let lyricLine = "";
     let i = 0;
 
     while (i < line.length) {
       if (line[i] === "[") {
-        let end = line.indexOf("]", i);
-        let chord = line.slice(i + 1, end);
-        chordLine += chord.padEnd(end - i + 1, " ");
-        i = end + 1;
-      } else {
-        chordLine += " ";
-        lyricLine += line[i];
-        i++;
+        const end = line.indexOf("]", i);
+
+        if (end !== -1) {
+          const chord = line.slice(i + 1, end);
+          const displayChord = transposeChord(chord, transpose);
+          chordLine += displayChord.padEnd(
+            Math.max(displayChord.length, end - i),
+            " "
+          );
+          i = end + 1;
+          continue;
+        }
       }
+
+      chordLine += " ";
+      lyricLine += line[i];
+      i++;
     }
 
-    output += `<span class="chords">${chordLine}</span>\n<span class="lyrics">${lyricLine}</span>\n`;
+    output +=
+      `<span class="chords">${escapeHtml(chordLine)}</span>\n` +
+      `<span class="lyrics">${escapeHtml(lyricLine)}</span>\n`;
   }
 
   return `<pre class="editor-text">${output}</pre>`;
@@ -178,10 +157,8 @@ function setupEditLogic(overlay, playlistName, songName) {
   const backBtn = overlay.querySelector(".back-to-songs-btn");
   let currentFontSize = 16;
 
-  function sanitizeContent(raw) {
-    const stripped = raw.replace(/<\/?[^>]+(>|$)/g, "");
-    return stripped.replace(/\r?\n/g, "\n");
-  }
+
+
 
   function saveSongContent(content) {
     const playlists = getPlaylists();
@@ -198,6 +175,7 @@ function setupEditLogic(overlay, playlistName, songName) {
 
     const parsed = initChords(content);
     overlay.querySelector(".editor-content").innerHTML = parsed;
+    setupSongTextZoom(overlay);
   }
 
   editBtn.addEventListener("click", () => {
@@ -225,12 +203,31 @@ function setupEditLogic(overlay, playlistName, songName) {
 
       const rawContent = currentSong?.content || "";
       overlay.querySelector(".editor-content").innerHTML =
-        `<pre class="editor-text" contenteditable="true">${rawContent}</pre>`;
+    `<pre class="editor-text" contenteditable="true"></pre>`;
 
-      const newSongText = overlay.querySelector(".editor-text");
-      newSongText.style.cursor = "text";
-      newSongText.style.fontSize = `${currentFontSize}px`;
-      newSongText.focus();
+overlay.querySelector(".editor-text").textContent = rawContent;
+
+const newSongText = overlay.querySelector(".editor-text");
+
+newSongText.addEventListener("paste", (e) => {
+  e.preventDefault();
+
+  const text = e.clipboardData.getData("text/plain");
+
+  if (document.execCommand) {
+    document.execCommand("insertText", false, text);
+  } else {
+    const selection = window.getSelection();
+    selection.deleteFromDocument();
+    selection.getRangeAt(0).insertNode(
+      document.createTextNode(text)
+    );
+  }
+});
+
+newSongText.style.cursor = "text";
+newSongText.style.fontSize = `${currentFontSize}px`;
+newSongText.focus();
 
       editBtn.textContent = "save";
       scrollBtn.classList.add("disabled");
@@ -324,4 +321,174 @@ export function setupSongTextZoom(overlay) {
   });
 
   songText.addEventListener("contextmenu", (e) => e.preventDefault());
+}
+
+function updateScrollButtonState(overlay) {
+  const editorText = overlay.querySelector(".editor-text");
+  const scrollBtn = overlay.querySelector(".editor-scroll-btn");
+
+  if (!editorText) return;
+
+  if (overlay._isEditing) {
+    scrollBtn.classList.add("disabled");
+    scrollBtn.disabled = true;
+    return;
+  }
+
+  const isScrollable = editorText.scrollHeight > editorText.clientHeight;
+
+  if (isScrollable) {
+    scrollBtn.classList.remove("disabled");
+    scrollBtn.disabled = false;
+  } else {
+    scrollBtn.classList.add("disabled");
+    scrollBtn.disabled = true;
+  }
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function sanitizeContent(raw) {
+  const temp = document.createElement("div");
+  temp.innerHTML = raw;
+
+  return temp.textContent
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n");
+}
+
+function setupAutoScroll(overlay) {
+  const scrollBtn = overlay.querySelector(".editor-scroll-btn");
+  const speedInput = overlay.querySelector(".speed-input");
+  const decreaseBtn = overlay.querySelector(".speed-decrease");
+  const increaseBtn = overlay.querySelector(".speed-increase");
+  const editorContainer = overlay.querySelector(".editor-content");
+
+  overlay._scrollInterval = null;
+  overlay._isEditing = false;
+
+  const getEditorText = () => overlay.querySelector(".editor-text");
+
+  function startAutoScroll() {
+    const speed = parseFloat(speedInput.value);
+    let accumulatedScroll = 0;
+
+    overlay._scrollInterval = setInterval(() => {
+      const editorText = getEditorText();
+
+      if (!editorText) {
+        clearInterval(overlay._scrollInterval);
+        overlay._scrollInterval = null;
+        setScrollButtonState(scrollBtn, false);
+        return;
+      }
+
+      accumulatedScroll += speed;
+      const scrollStep = Math.floor(accumulatedScroll);
+
+      if (scrollStep > 0) {
+        editorText.scrollTop += scrollStep;
+        accumulatedScroll -= scrollStep;
+      }
+
+      if (
+        editorText.scrollTop + editorText.clientHeight >=
+        editorText.scrollHeight
+      ) {
+        clearInterval(overlay._scrollInterval);
+        overlay._scrollInterval = null;
+        setScrollButtonState(scrollBtn, false);
+        updateScrollButtonState(overlay);
+      }
+    }, 100);
+  }
+
+  function adjustSpeed(delta) {
+    let currentSpeed = parseFloat(speedInput.value);
+    let newSpeed = Math.min(5, Math.max(0.1, currentSpeed + delta));
+    speedInput.value = newSpeed.toFixed(1);
+
+    if (overlay._scrollInterval !== null) {
+      clearInterval(overlay._scrollInterval);
+      startAutoScroll();
+    }
+  }
+
+  function setupSpeedOptions(button, delta) {
+    let holdTimeout;
+    let holdInterval;
+
+    const start = (e) => {
+      e.preventDefault();
+
+      adjustSpeed(delta);
+
+      holdTimeout = setTimeout(() => {
+        holdInterval = setInterval(() => adjustSpeed(delta), 100);
+      }, 300);
+    };
+
+    const stop = () => {
+      clearTimeout(holdTimeout);
+      clearInterval(holdInterval);
+    };
+
+    button.addEventListener("mousedown", start);
+    button.addEventListener("touchstart", start);
+
+    ["mouseup", "mouseleave", "touchend", "touchcancel"].forEach((evt) => {
+      button.addEventListener(evt, stop);
+    });
+  }
+
+  setupSpeedOptions(decreaseBtn, -0.1);
+  setupSpeedOptions(increaseBtn, +0.1);
+
+  scrollBtn.addEventListener("click", () => {
+    if (scrollBtn.disabled) return;
+
+    const isScrolling = overlay._scrollInterval !== null;
+
+    if (isScrolling) {
+      clearInterval(overlay._scrollInterval);
+      overlay._scrollInterval = null;
+      setScrollButtonState(scrollBtn, false);
+    } else {
+      startAutoScroll();
+      setScrollButtonState(scrollBtn, true);
+    }
+  });
+
+  speedInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      let newSpeed = parseFloat(speedInput.value);
+
+      if (!isNaN(newSpeed)) {
+        newSpeed = Math.min(5, Math.max(0.1, newSpeed));
+        speedInput.value = newSpeed.toFixed(1);
+
+        if (overlay._scrollInterval !== null) {
+          clearInterval(overlay._scrollInterval);
+          startAutoScroll();
+        }
+      }
+    }
+  });
+
+  editorContainer.addEventListener("scroll", () =>
+    updateScrollButtonState(overlay)
+  );
+
+  updateScrollButtonState(overlay);
+
+  window.addEventListener("resize", () =>
+    updateScrollButtonState(overlay)
+  );
 }

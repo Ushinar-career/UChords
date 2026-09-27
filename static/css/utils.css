@@ -22,7 +22,7 @@
     border: var(--border);
     border-radius: var(--radius-rounded-sm);
     background: var(--bg-color);
-    padding: 3rem;
+    padding: 1rem;
 }
 
 .modal-content label {

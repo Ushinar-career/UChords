@@ -195,10 +195,9 @@ input[type=number]::-webkit-outer-spin-button {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: var(--background-color) !important;
+  background-color: var(--bg-color);
   border: var(--border);
   border-radius: var(--radius-rounded-sm);
-
 }
 
 .editor-content {
@@ -222,7 +221,7 @@ input[type=number]::-webkit-outer-spin-button {
   cursor: zoom-in;
   touch-action: manipulation;
   padding: 1rem;
-  background-color: var(--background-color);
+  background-color: var(--bg-color);
   overflow: auto;
 }
 

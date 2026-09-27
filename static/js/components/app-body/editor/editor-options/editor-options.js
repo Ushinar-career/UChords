@@ -1,5 +1,5 @@
 // static/js/components/app-body/editor/editor-options.js
-import { getPlaylists, setPlaylists } from "../../app-storage/local-storage.js";
+import { getPlaylists, setPlaylists } from "../../../app-storage/local-storage.js";
 
 const NOTES = [
   "C", "C#", "D", "D#", "E", "F",

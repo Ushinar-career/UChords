@@ -13,7 +13,7 @@ export function initSongModal(container, playlistName) {
         <input type="text" class="song-name-input" placeholder="Enter song name"/>
       </label>
       <label>
-        Artist:
+        Artist (optional):
         <input type="text" class="song-artist-input" placeholder="Enter artist name"/>
       </label>
       <label>

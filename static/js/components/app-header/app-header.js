@@ -1,5 +1,6 @@
 // static\js\components\app-header\app-header.js
 import { getPlaylists } from "../app-storage/local-storage.js";
+import { replaceNavigation } from "../app-navigation/navigation.js";
 import { initPlaylists } from "../app-body/playlists/playlists.js";
 import { initHomeScreen } from "../../screens/home.js";
 

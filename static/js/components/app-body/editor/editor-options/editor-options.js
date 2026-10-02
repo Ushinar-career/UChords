@@ -1,4 +1,4 @@
-// static/js/components/app-body/editor/editor-options.js
+// static/js/components/app-body/editor/editor-options/editor-options.js
 import { getPlaylists, setPlaylists } from "../../../app-storage/local-storage.js";
 
 const NOTES = [
@@ -24,6 +24,51 @@ export function setupEditorOptions(overlay, playlistName, songName, songContent)
 
 }
 
+export function initChords(editorContent, transpose = 0) {
+  const safeContent = sanitizeContent(editorContent);
+  const lines = safeContent.split("\n");
+
+  const escapeHtml = (str) => {
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  };
+
+  let output = "";
+
+  for (const line of lines) {
+    let chordLine = "";
+    let lyricLine = "";
+    let i = 0;
+
+    while (i < line.length) {
+      if (line[i] === "[") {
+        const end = line.indexOf("]", i);
+
+        if (end !== -1) {
+          const chord = line.slice(i + 1, end);
+          const displayChord = transposeChord(chord, transpose);
+          chordLine += displayChord.padEnd(
+            Math.max(displayChord.length, end - i),
+            " "
+          );
+          i = end + 1;
+          continue;
+        }
+      }
+
+      chordLine += " ";
+      lyricLine += line[i];
+      i++;
+    }
+
+    output +=
+      `<span class="chords">${escapeHtml(chordLine)}</span>\n` +
+      `<span class="lyrics">${escapeHtml(lyricLine)}</span>\n`;
+  }
+
+  return `<pre class="editor-text">${output}</pre>`;
+}
 
 function setScrollButtonState(scrollBtn, isScrolling) {
   if (isScrolling) {
@@ -105,52 +150,6 @@ function detectOriginalKey(editorContent) {
     }
   }
   return bestKey;
-}
-
-export function initChords(editorContent, transpose = 0) {
-  const safeContent = sanitizeContent(editorContent);
-  const lines = safeContent.split("\n");
-
-  const escapeHtml = (str) => {
-    const div = document.createElement("div");
-    div.textContent = str;
-    return div.innerHTML;
-  };
-
-  let output = "";
-
-  for (const line of lines) {
-    let chordLine = "";
-    let lyricLine = "";
-    let i = 0;
-
-    while (i < line.length) {
-      if (line[i] === "[") {
-        const end = line.indexOf("]", i);
-
-        if (end !== -1) {
-          const chord = line.slice(i + 1, end);
-          const displayChord = transposeChord(chord, transpose);
-          chordLine += displayChord.padEnd(
-            Math.max(displayChord.length, end - i),
-            " "
-          );
-          i = end + 1;
-          continue;
-        }
-      }
-
-      chordLine += " ";
-      lyricLine += line[i];
-      i++;
-    }
-
-    output +=
-      `<span class="chords">${escapeHtml(chordLine)}</span>\n` +
-      `<span class="lyrics">${escapeHtml(lyricLine)}</span>\n`;
-  }
-
-  return `<pre class="editor-text">${output}</pre>`;
 }
 
 function setupEditLogic(overlay, playlistName, songName) {

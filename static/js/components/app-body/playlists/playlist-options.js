@@ -1,5 +1,6 @@
 // static/js/components/app-body/playlists/playlist-options.js
 import { getPlaylists, setPlaylists } from "../../app-storage/local-storage.js";
+import { pushNavigation } from "../../app-navigation/navigation.js";
 import { initSongs } from "../../app-body/songs/songs.js";
 
 function getDragAfterElement(container, y) {
@@ -58,11 +59,11 @@ export function attachPlaylistOptions(body, rerenderFn) {
       card.classList.remove("dragging");
       card.style.cursor = "default";
     });
-
+    
     card.addEventListener("click", () => {
+      pushNavigation({ screen: "songs", playlistName });
       initSongs(body, playlistName);
     });
-  });
 
   const container = body.querySelector(".body-cards-container");
   container.addEventListener("dragover", e => {
@@ -90,14 +91,14 @@ export function attachPlaylistOptions(body, rerenderFn) {
   });
 
 
-  container.addEventListener("drop", () => {
+    container.addEventListener("drop", () => {
     const newOrderNames = Array.from(container.querySelectorAll(".playlist-card"))
       .map(card => card.querySelector("h3").textContent);
-
     const playlists = getPlaylists();
     const updated = newOrderNames.map(name => playlists.find(p => p.name === name));
 
     setPlaylists(updated);
     rerenderFn(body);
   });
-}
+})}
+

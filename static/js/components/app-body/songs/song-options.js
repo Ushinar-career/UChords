@@ -1,5 +1,6 @@
 // static/js/components/app-body/songs/song-options.js
 import { getSongs, getPlaylists, setPlaylists } from "../../app-storage/local-storage.js";
+import { pushNavigation } from "../../app-navigation/navigation.js";
 import { initEditor } from "../editor/editor.js";
 
 function getDragAfterElement(container, y) {
@@ -88,11 +89,12 @@ export function attachSongOptions(container, playlistName, rerenderFn) {
       card.classList.remove("dragging");
       card.style.cursor = "default";
     });
-
-    card.addEventListener("click", () => {
+card.addEventListener("click", () => {
+      pushNavigation({ screen: "editor", playlistName, songName: song?.name || "" });
       initEditor(container, playlistName, song?.name || "", song?.content || "");
     });
-  });
+    });
+ 
 
   cardsContainer.addEventListener("dragover", e => {
     e.preventDefault();
@@ -134,5 +136,4 @@ export function attachSongOptions(container, playlistName, rerenderFn) {
     setPlaylists(updatedPlaylists);
     rerenderFn(container, playlistName);
   });
-}
-
+};

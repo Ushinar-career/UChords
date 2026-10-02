@@ -19,9 +19,9 @@ export function initSongs(container, playlistName) {
       initSongModal(targetContainer, targetPlaylist);
     });
 
-    const backBtn = targetContainer.querySelector(".back-to-playlists-btn");
+const backBtn = targetContainer.querySelector(".back-to-playlists-btn");
     backBtn.addEventListener("click", () => {
-      initPlaylists(targetContainer);
+      history.back();
     });
   }
 

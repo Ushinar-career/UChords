@@ -16,21 +16,28 @@ export function savePlaylist(name) {
 
 export function saveSong(playlistName, songData) {
   const playlists = getPlaylists();
+
   const updatedPlaylists = playlists.map(p => {
     if (p.name === playlistName) {
       const songs = p.songs || [];
-      songs.push({
-        id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
+
+      songs.unshift({
+        id: crypto.randomUUID
+          ? crypto.randomUUID()
+          : Date.now().toString(),
         name: songData.name,
         artist: songData.artist,
         country: songData.country,
         language: songData.language,
         content: songData.content || ""
       });
+
       return { ...p, songs };
     }
+
     return p;
   });
+
   setPlaylists(updatedPlaylists);
 }
 

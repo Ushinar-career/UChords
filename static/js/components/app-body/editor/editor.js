@@ -2,7 +2,7 @@
 import { initSongs } from "../songs/songs.js";
 
 import { renderEditor } from "./editor-renderer.js";
-import { setupEditorOptions, initChords } from "./editor-options.js";
+import { setupEditorOptions, initChords } from "./editor-options/editor-options.js";
 
 export function initEditor(container, playlistName, songName, songContent) {
   const overlay = renderEditor(container, playlistName, songName, songContent);
@@ -12,9 +12,9 @@ export function initEditor(container, playlistName, songName, songContent) {
     overlay.querySelector(".editor-content").innerHTML = parsed;
   }
 
-  overlay.querySelector(".back-to-songs-btn").addEventListener("click", () => {
+overlay.querySelector(".back-to-songs-btn").addEventListener("click", () => {
     overlay.remove();
-    initSongs(container, playlistName);
+    history.back();
   });
 
   setupEditorOptions(overlay, playlistName, songName, songContent);
